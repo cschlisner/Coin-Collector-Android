@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.cschlisner.cc"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.cschlisner.cc.TitleScreenActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.cschlisner.cc.NextLevelActivity"
+            android:label="@string/title_activity_next_level"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.cschlisner.cc.GameActivity"
+            android:label="@string/title_activity_game"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.cschlisner.cc.PauseActivity"
+            android:label="@string/title_activity_pause"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.cschlisner.cc.GameOverActivity"
+            android:label="@string/title_activity_game_over" >
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Coin Collector</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_next_level">NextLevelActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_game">GameActivity</string>
+    <string name="title_activity_pause">PauseActivity</string>
+    <string name="title_activity_game_over">GameOverActivity</string>
+
+</resources>
