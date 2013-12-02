@@ -26,7 +26,7 @@ public class GameOverActivity extends Activity {
     }
     public class GameOverView extends View {
         private Paint paint = new Paint();
-        private String title = "Paused";
+        private String title = "You Died!";
         private TextContainer resumeButton, menuButton, devButton;
         private int titleX, screenWidth, screenHeight;
         public GameOverView(Context context){
