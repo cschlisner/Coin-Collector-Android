@@ -46,6 +46,7 @@ public class NextLevelActivity extends Activity {
 
             Intent intent = getIntent();
             mode = intent.getStringExtra("DIFFICULTY");
+            Collisions.mode = mode;
             level = intent.getIntExtra("LEVEL", 1);
             playerSpeedGained = intent.getIntExtra("SPEED", 0);
             score = intent.getIntExtra("SCORE", 0);

@@ -27,8 +27,9 @@ public class PauseActivity extends Activity {
     public class PauseView extends View {
         private Paint paint = new Paint();
         private String title = "Paused";
-        private TextContainer resumeButton, menuButton, devButton;
+        private TextContainer resumeButton, menuButton;
         private int titleX, screenWidth, screenHeight;
+        private boolean startNewActivity;
         public PauseView(Context context){
             super(context);
             titleX = 20;
@@ -37,24 +38,23 @@ public class PauseActivity extends Activity {
             resumeButton = new TextContainer("resume", 60, (screenWidth/2)-(screenWidth/20),
                     (screenHeight/2)-(screenHeight/6));
             menuButton = new TextContainer("main menu", 60, (screenWidth/2), screenHeight/2);
-            devButton = new TextContainer("dev: "+Boolean.toString(Collisions.devMode), 60, (screenWidth/2)+(screenWidth/20),
-                    (screenHeight/2)+(screenHeight/6));
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             resumeButton.draw(canvas);
             menuButton.draw(canvas);
-            devButton.draw(canvas);
             paint.setTypeface(Typeface.DEFAULT);
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);
-            update();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) { }
-            invalidate();
+            if (resumeButton.pressed || menuButton.pressed){
+                update();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) { }
+                invalidate();
+            }
         }
 
         @Override
@@ -65,17 +65,12 @@ public class PauseActivity extends Activity {
             if (resumeButton.bounds.contains((int)x, (int)y)){
                 resumeButton.pressed = true;
                 menuButton.paint.setAlpha(0);
-                devButton.paint.setAlpha(0);
+                postInvalidate();
             }
             else if (menuButton.bounds.contains((int)x, (int)y)){
                 menuButton.pressed = true;
                 resumeButton.paint.setAlpha(0);
-                devButton.paint.setAlpha(0);
-            }
-            else if (devButton.bounds.contains((int)x, (int)y)){
-                devButton.pressed = true;
-                menuButton.paint.setAlpha(0);
-                resumeButton.paint.setAlpha(0);
+                postInvalidate();
             }
             return true;
         }
@@ -96,28 +91,14 @@ public class PauseActivity extends Activity {
                     menuButton.bounds.left += 30;
                     titleX -= 30;
                 }
-                else {
-                    startMenu();
-                    finish();
-                }
-            }
-            if (devButton.pressed){
-                if (devButton.bounds.left <= screenWidth || titleX >= 0-paint.measureText(title)){
-                    devButton.bounds.left += 30;
-                    titleX -= 30;
-                }
-                else {
-                    Collisions.devMode = !Collisions.devMode;
-                    pressBack();
+                else if (!startNewActivity){
+                    startNewActivity = true;
+                    Intent i = new Intent(getContext(), TitleScreenActivity.class);
+                    startActivity(i);
                     finish();
                 }
             }
         }
-    }
-
-    public void startMenu(){
-        Intent i = new Intent(this, TitleScreenActivity.class);
-        startActivity(i);
     }
     public void pressBack() {
         super.onBackPressed();

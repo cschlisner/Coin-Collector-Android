@@ -51,6 +51,7 @@ public class GameActivity extends ActionBarActivity{
     @Override
     protected void onResume() {
         inPause = false;
+        thread.setRunning(true);
         super.onResume();
     }
 
@@ -215,24 +216,28 @@ public class GameActivity extends ActionBarActivity{
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            // at this point the surface is created and
-            // we can safely start the game loop
-            thread.setRunning(true);
-            thread.start();
+            if (thread.getState() == Thread.State.TERMINATED) {
+                thread = new MainThread(getHolder(), this);
+                thread.setRunning(true);
+                thread.start();
+            }
+            else {
+                thread.setRunning(true);
+                thread.start();
+            }
         }
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            // tell the thread to shut down and wait for it to finish
-            // this is a clean shutdown
             boolean retry = true;
             while (retry) {
                 try {
+                    thread.setRunning(false);
                     thread.join();
-                    retry = false;
                 } catch (InterruptedException e) {
-                    // try again shutting down the thread
+                    e.printStackTrace();
                 }
+                retry = false;
             }
         }
 
@@ -279,8 +284,11 @@ public class GameActivity extends ActionBarActivity{
             if (statusBar.pauseButton.pressed) {
                 statusBar.pauseButton.pressed = false;
                 thread.setRunning(false);
-                startActivity(new Intent(getContext(), PauseActivity.class));
-                inPause = true;
+                if (!inPause){
+                    startedActivity = true;
+                    inPause = true;
+                    startActivity(new Intent(getContext(), PauseActivity.class));
+                }
             }
             statusBar.update(lives, score);
             checkWin();
@@ -320,7 +328,7 @@ public class GameActivity extends ActionBarActivity{
             if (potLevel)
                 potion.update(player.playerRect);
             player.msg = "";
-            if (Collisions.fireCollision && !Collisions.devMode){
+            if (Collisions.fireCollision){
                 player.msg = "DARN";
                 Collisions.fireCollision = false;
                 --lives;
@@ -340,7 +348,7 @@ public class GameActivity extends ActionBarActivity{
                 Collisions.coinCollision = false;
             }
             if (Collisions.potionCollision){
-                player.msg = "AWWWWWW YISSSSS!";
+                player.msg = "YISSSSS!";
                 score += 200;
                 ++playerSpeed;
                 Collisions.potionCollision = false;

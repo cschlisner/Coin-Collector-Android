@@ -27,28 +27,34 @@ public class GameOverActivity extends Activity {
     public class GameOverView extends View {
         private Paint paint = new Paint();
         private String title = "You Died!";
-        private TextContainer menuButton;
+        private TextContainer restartButton, menuButton;
         private int titleX, screenWidth, screenHeight;
+        private boolean startedNewActivity;
         public GameOverView(Context context){
             super(context);
             titleX = 20;
             screenWidth = context.getResources().getDisplayMetrics().widthPixels;
             screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+            restartButton = new TextContainer("restart", 60, (screenWidth/2)-(screenWidth/20),
+                    (screenHeight/2)-(screenHeight/6));
             menuButton = new TextContainer("main menu", 60, (screenWidth/2), screenHeight/2);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
+            restartButton.draw(canvas);
             menuButton.draw(canvas);
             paint.setTypeface(Typeface.DEFAULT);
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);
-            update();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) { }
-            invalidate();
+            if (restartButton.pressed || menuButton.pressed){
+                update();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) { }
+                invalidate();
+            }
         }
 
         @Override
@@ -56,29 +62,48 @@ public class GameOverActivity extends Activity {
             float x = e.getX();
             float y = e.getY();
 
-            if (menuButton.bounds.contains((int)x, (int)y)){
+            if (restartButton.bounds.contains((int)x, (int)y)){
+                restartButton.pressed = true;
+                menuButton.paint.setAlpha(0);
+                postInvalidate();
+            }
+            else if (menuButton.bounds.contains((int)x, (int)y)){
                 menuButton.pressed = true;
+                restartButton.paint.setAlpha(0);
+                postInvalidate();
             }
             return true;
         }
 
         private void update(){
-            if (menuButton.pressed){
+            if (restartButton.pressed){
+                if (restartButton.bounds.left <= screenWidth || titleX >= 0-paint.measureText(title)){
+                    restartButton.bounds.left += 30;
+                    titleX -= 30;
+                }
+                else if (!startedNewActivity){
+                    startedNewActivity = true;
+                    Context context = getContext();
+                    Intent i = new Intent(context, NextLevelActivity.class);
+                    i.putExtra("DIFFICULTY", Collisions.mode);
+                    i.putExtra("LEVEL", 1);
+                    context.startActivity(i);
+                    finish();
+                }
+            }
+            else if (menuButton.pressed){
                 if (menuButton.bounds.left <= screenWidth || titleX >= 0-paint.measureText(title)){
                     menuButton.bounds.left += 30;
                     titleX -= 30;
                 }
-                else {
-                    startMenu();
+                else if (!startedNewActivity){
+                    startedNewActivity = true;
+                    Intent i = new Intent(getContext(), TitleScreenActivity.class);
+                    startActivity(i);
                     finish();
                 }
             }
         }
-    }
-
-    public void startMenu(){
-        Intent i = new Intent(this, TitleScreenActivity.class);
-        startActivity(i);
     }
     @Override
     public void onBackPressed() {}

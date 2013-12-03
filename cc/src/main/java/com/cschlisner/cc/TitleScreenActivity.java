@@ -53,11 +53,13 @@ public class TitleScreenActivity extends ActionBarActivity {
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);
-            update();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) { }
-            invalidate();
+            if (easyButton.pressed || mediumButton.pressed || hardButton.pressed){
+                update();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) { }
+                invalidate();
+            }
         }
 
         @Override
@@ -69,16 +71,19 @@ public class TitleScreenActivity extends ActionBarActivity {
                 easyButton.pressed = true;
                 mediumButton.paint.setAlpha(0);
                 hardButton.paint.setAlpha(0);
+                postInvalidate();
             }
             else if (mediumButton.bounds.contains((int)x, (int)y)){
                 mediumButton.pressed = true;
                 easyButton.paint.setAlpha(0);
                 hardButton.paint.setAlpha(0);
+                postInvalidate();
             }
             else if (hardButton.bounds.contains((int)x, (int)y)){
                 hardButton.pressed = true;
                 mediumButton.paint.setAlpha(0);
                 easyButton.paint.setAlpha(0);
+                postInvalidate();
             }
             return true;
         }
