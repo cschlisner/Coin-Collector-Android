@@ -11,11 +11,16 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class NextLevelActivity extends Activity {
+    private String mode;
+    private int level, timer = 3, updates, lives, coins, score, fireSpeed,
+            fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight;
+    private static final String TAG = NextLevelActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,10 +33,8 @@ public class NextLevelActivity extends Activity {
 
     public class NextLevelView extends View {
         private Paint paint = new Paint();
-        private String mode;
-        private int level, timer = 3, updates, lives, coins, score, fireSpeed,
-                fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight;
         private Bitmap livesBMP, coinBMP, fireBMP;
+        private boolean startedActivity;
         public NextLevelView(Context context){
             super(context);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -51,21 +54,21 @@ public class NextLevelActivity extends Activity {
                 coins = 10 + level;
                 fireSpeed = 8;
                 fireCount = 9 + level;
-                playerSpeed = 4 + playerSpeedGained;
+                playerSpeed = 7 + playerSpeedGained;
             }
             else if (mode.equals("med")){
                 lives = 5 + level;
                 coins = 11 + level;
                 fireSpeed = 9;
                 fireCount = 10 + level;
-                playerSpeed = 5 + playerSpeedGained;
+                playerSpeed = 7 + playerSpeedGained;
             }
             else if (mode.equals("hard")){
                 lives = 6 + level;
                 coins = 12 + level;
                 fireSpeed = 10;
                 fireCount = 11 + level;
-                playerSpeed = 6 + playerSpeedGained;
+                playerSpeed = 7 + playerSpeedGained;
             }
             paint.setTypeface(Typeface.DEFAULT);
             paint.setColor(Color.WHITE);
@@ -84,20 +87,13 @@ public class NextLevelActivity extends Activity {
 
             paint.setTextSize(100);
             canvas.drawText(String.format("%d", timer),  screenWidth/2, screenHeight/2-screenHeight/4, paint);
-            update();
             try {
-                Thread.sleep(10);
+                Thread.sleep(1000);
             } catch (InterruptedException e) { }
-            invalidate();
-        }
-
-        private void update(){
-            ++updates;
-            if (updates >= 35){
-                --timer;
-                updates = 0;
-            }
-            if (timer == 0) {
+            --timer;
+            if (timer > 0) invalidate();
+            else if (!startedActivity){
+                startedActivity = true;
                 Intent i = new Intent(getContext(), GameActivity.class);
                 i.putExtra("LEVEL", level);
                 i.putExtra("LIVES", lives);
@@ -107,10 +103,10 @@ public class NextLevelActivity extends Activity {
                 i.putExtra("PLAYERSPEED", playerSpeed);
                 i.putExtra("DIFFICULTY", mode);
                 i.putExtra("SCORE", score);
-                getContext().startActivity(i);
+                startActivity(i);
+                Log.d(TAG, "started gameActivity");
                 finish();
             }
         }
     }
-
 }

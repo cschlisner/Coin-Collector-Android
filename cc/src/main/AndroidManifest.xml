@@ -40,7 +40,8 @@
         </activity>
         <activity
             android:name="com.cschlisner.cc.GameOverActivity"
-            android:label="@string/title_activity_game_over" >
+            android:label="@string/title_activity_game_over"
+            android:screenOrientation="landscape" >
         </activity>
     </application>
 

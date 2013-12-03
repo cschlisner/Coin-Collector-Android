@@ -21,7 +21,7 @@ public class PauseActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        PauseView pauseView = new PauseView(getApplicationContext());
+        PauseView pauseView = new PauseView(this);
         setContentView(pauseView);
     }
     public class PauseView extends View {

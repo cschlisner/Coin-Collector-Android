@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -18,8 +19,9 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class GameActivity extends ActionBarActivity{
+    private static final String TAG = GameActivity.class.getSimpleName();
+    private boolean inPause;
     public enum Direction {up, down, left, right, none}
-    private boolean reset = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,20 +31,6 @@ public class GameActivity extends ActionBarActivity{
         GameView gameView = new GameView(this);
         setContentView(gameView);
     }
-
-    @Override
-    protected void onPause() {
-        if (!reset){
-            reset = true;
-            startActivity(new Intent(this, PauseActivity.class));
-            super.onPause();
-        }
-        else {
-            reset = false;
-            super.onResume();
-        }
-    }
-
     @Override
     public void onBackPressed() {}
 
@@ -108,7 +96,7 @@ public class GameActivity extends ActionBarActivity{
             int y = (int)event.getY();
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN){
-                if (statusBar.pauseButton.bounds.contains(x,y)){
+                if (statusBar.pauseButton.bounds.contains(x,y) && !statusBar.pauseButton.pressed){
                    statusBar.pauseButton.pressed = true;
                 }
                 else {
@@ -140,20 +128,26 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(player.msg, player.posX, player.posY, paint);
+            canvas.drawText(player.msg, player.posX, player.posY-10, paint);
             statusBar.draw(canvas);
-            update();
-            try {Thread.sleep(15);}
-            catch (InterruptedException e) { }
-            invalidate();
+            if (!statusBar.pauseButton.pressed){
+                update();
+                try {Thread.sleep(15);}
+                catch (InterruptedException e) { }
+                invalidate();
+            }
+            else {
+                statusBar.pauseButton.pressed = false;
+                if (!inPause){
+                startActivity(new Intent(getContext(), PauseActivity.class));
+                inPause = true;
+                Log.d(TAG,"Paused");
+                }
+            }
         }
 
         public void update(){
             statusBar.update(lives, score);
-            if (statusBar.pauseButton.pressed){
-                statusBar.pauseButton.pressed = false;
-                onPause();
-            }
             checkWin();
 
             // move player according to state of control field
@@ -192,7 +186,7 @@ public class GameActivity extends ActionBarActivity{
                 potion.update(player.playerRect);
             player.msg = "";
             if (Collisions.fireCollision && !Collisions.devMode){
-                player.msg = "FUCK";
+                player.msg = "DARN";
                 Collisions.fireCollision = false;
                 --lives;
                 for (int i=0; i<fireCount; ++i){
@@ -204,13 +198,13 @@ public class GameActivity extends ActionBarActivity{
                 player.posY = screenHeight/2+statusBar.height;
             }
             if (Collisions.coinCollision){
-                player.msg = "TITS!";
+                player.msg = "SWEET!";
                 score += 100;
                 ++coinsCollected;
                 Collisions.coinCollision = false;
             }
             if (Collisions.potionCollision){
-                player.msg = "SHIT YEAH!";
+                player.msg = "AWWWWWW YISSSSS!";
                 score += 200;
                 ++playerSpeed;
                 Collisions.potionCollision = false;
@@ -222,15 +216,33 @@ public class GameActivity extends ActionBarActivity{
                 Intent i = new Intent(getContext(), NextLevelActivity.class);
                 i.putExtra("DIFFICULTY", difficulty);
                 i.putExtra("LEVEL", level+1);
-                i.putExtra("SPEED", playerSpeed-4);
+                i.putExtra("SPEED", playerSpeed-7);
                 i.putExtra("SCORE", score);
                 getContext().startActivity(i);
                 finish();
             }
-            if (lives <= 0){
-                //end game
+            else if (lives <= 0){
+                Intent i = new Intent(getContext(), GameOverActivity.class);
+                getContext().startActivity(i);
+                finish();
             }
         }
 
+    }
+
+    @Override
+    protected void onPause() {
+        if (!inPause){
+            startActivity(new Intent(this, PauseActivity.class));
+            Log.d(TAG, "Paused from onPause");
+            inPause = true;
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        inPause = false;
+        super.onResume();
     }
 }

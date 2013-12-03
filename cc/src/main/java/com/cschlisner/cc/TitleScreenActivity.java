@@ -9,12 +9,15 @@ import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class TitleScreenActivity extends ActionBarActivity {
+    private TextContainer easyButton, mediumButton, hardButton;
+    private boolean startedNewActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +29,6 @@ public class TitleScreenActivity extends ActionBarActivity {
     }
     public class TitleScreenView extends View {
         private Paint paint = new Paint();
-        private TextContainer easyButton, mediumButton, hardButton;
         public int screenWidth, screenHeight, titleX = 20;
         private String title = "Coin Collector";
         public TitleScreenView(Context context){
@@ -87,12 +89,14 @@ public class TitleScreenActivity extends ActionBarActivity {
                     easyButton.bounds.left += 30;
                     titleX -= 30;
                 }
-                else {
+                else if (!startedNewActivity){
+                    startedNewActivity = true;
                     Context context = getContext();
                     Intent i = new Intent(context, NextLevelActivity.class);
                     i.putExtra("DIFFICULTY", "easy");
                     i.putExtra("LEVEL", 1);
                     context.startActivity(i);
+                    Log.d("TitleScreenActivity", "started NextLevelActivity");
                     finish();
                 }
             }
@@ -101,7 +105,8 @@ public class TitleScreenActivity extends ActionBarActivity {
                     mediumButton.bounds.left += 30;
                     titleX -= 30;
                 }
-                else {
+                else if (!startedNewActivity) {
+                    startedNewActivity = true;
                     Context context = getContext();
                     Intent i = new Intent(context, NextLevelActivity.class);
                     i.putExtra("DIFFICULTY", "med");
@@ -115,7 +120,8 @@ public class TitleScreenActivity extends ActionBarActivity {
                     hardButton.bounds.left += 30;
                     titleX -= 30;
                 }
-                else {
+                else if (!startedNewActivity) {
+                    startedNewActivity = true;
                     Context context = getContext();
                     Intent i = new Intent(context, NextLevelActivity.class);
                     i.putExtra("DIFFICULTY", "hard");
@@ -126,5 +132,4 @@ public class TitleScreenActivity extends ActionBarActivity {
             }
         }
     }
-
 }
