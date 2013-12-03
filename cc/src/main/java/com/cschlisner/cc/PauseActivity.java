@@ -74,7 +74,6 @@ public class PauseActivity extends Activity {
             }
             else if (devButton.bounds.contains((int)x, (int)y)){
                 devButton.pressed = true;
-                Collisions.devMode = !Collisions.devMode;
                 menuButton.paint.setAlpha(0);
                 resumeButton.paint.setAlpha(0);
             }
@@ -108,6 +107,7 @@ public class PauseActivity extends Activity {
                     titleX -= 30;
                 }
                 else {
+                    Collisions.devMode = !Collisions.devMode;
                     pressBack();
                     finish();
                 }
