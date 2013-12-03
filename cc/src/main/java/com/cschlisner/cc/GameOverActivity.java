@@ -35,16 +35,16 @@ public class GameOverActivity extends Activity {
             titleX = 20;
             screenWidth = context.getResources().getDisplayMetrics().widthPixels;
             screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-            restartButton = new TextContainer("restart", 60, (screenWidth/2)-(screenWidth/20),
+            restartButton = new TextContainer(context, "restart", 60, (screenWidth/2)-(screenWidth/20),
                     (screenHeight/2)-(screenHeight/6));
-            menuButton = new TextContainer("main menu", 60, (screenWidth/2), screenHeight/2);
+            menuButton = new TextContainer(context, "main menu", 60, (screenWidth/2), screenHeight/2);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             restartButton.draw(canvas);
             menuButton.draw(canvas);
-            paint.setTypeface(Typeface.DEFAULT);
+            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);

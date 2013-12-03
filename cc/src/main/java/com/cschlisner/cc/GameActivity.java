@@ -143,7 +143,7 @@ public class GameActivity extends ActionBarActivity{
 
             paint = new Paint();
             paint.setColor(Color.WHITE);
-            paint.setTypeface(Typeface.DEFAULT);
+            paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
             paint.setTextSize(40);
             Intent intent = getIntent();
             difficulty = intent.getStringExtra("DIFFICULTY");

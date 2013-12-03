@@ -35,16 +35,16 @@ public class PauseActivity extends Activity {
             titleX = 20;
             screenWidth = context.getResources().getDisplayMetrics().widthPixels;
             screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-            resumeButton = new TextContainer("resume", 60, (screenWidth/2)-(screenWidth/20),
+            resumeButton = new TextContainer(context, "resume", 60, (screenWidth/2)-(screenWidth/20),
                     (screenHeight/2)-(screenHeight/6));
-            menuButton = new TextContainer("main menu", 60, (screenWidth/2), screenHeight/2);
+            menuButton = new TextContainer(context, "main menu", 60, (screenWidth/2), screenHeight/2);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             resumeButton.draw(canvas);
             menuButton.draw(canvas);
-            paint.setTypeface(Typeface.DEFAULT);
+            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);

@@ -36,10 +36,10 @@ public class TitleScreenActivity extends ActionBarActivity {
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
             screenHeight = metrics.heightPixels;
-            easyButton = new TextContainer("easy mode", 60, (screenWidth/2)-(screenWidth/20),
+            easyButton = new TextContainer(context, "easy mode", 60, (screenWidth/2)-(screenWidth/20),
                     (screenHeight/2)-(screenHeight/6));
-            mediumButton = new TextContainer("medium mode", 60, (screenWidth/2), screenHeight/2);
-            hardButton = new TextContainer("hard mode", 60, (screenWidth/2)+(screenWidth/20),
+            mediumButton = new TextContainer(context, "medium mode", 60, (screenWidth/2), screenHeight/2);
+            hardButton = new TextContainer(context, "hard mode", 60, (screenWidth/2)+(screenWidth/20),
                     (screenHeight/2)+(screenHeight/6));
 
         }
@@ -49,7 +49,7 @@ public class TitleScreenActivity extends ActionBarActivity {
             easyButton.draw(canvas);
             mediumButton.draw(canvas);
             hardButton.draw(canvas);
-            paint.setTypeface(Typeface.DEFAULT);
+            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);

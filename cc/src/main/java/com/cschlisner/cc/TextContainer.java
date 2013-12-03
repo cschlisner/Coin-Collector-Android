@@ -1,5 +1,6 @@
 package com.cschlisner.cc;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,9 +17,9 @@ public class TextContainer {
     public boolean pressed;
     private Rect textBounds = new Rect();
     private String text;
-    public TextContainer(String Text, int Size, int x, int y){
+    public TextContainer(Context context, String Text, int Size, int x, int y){
         paint.setTextSize(Size);
-        paint.setTypeface(Typeface.DEFAULT);
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
         paint.setColor(Color.WHITE);
         text = Text;
         paint.getTextBounds(text, 0, text.length(), textBounds);

@@ -26,12 +26,12 @@ public class StatusBar {
         imageWidth = livesBmp.getWidth()+5;
         imageHeight = livesBmp.getHeight();
         paint.setTextSize(40);
-        paint.setTypeface(Typeface.DEFAULT);
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
         paint.getTextBounds(livesString, 0, livesString.length(), textBounds);
         bounds.set(0, 0, sw, textBounds.height() + 10);
         height = bounds.height();
 
-        pauseButton = new TextContainer("pause", 40, bounds.centerX()+350, bounds.top);
+        pauseButton = new TextContainer(context, "pause", 40, bounds.centerX()+350, bounds.top);
     }
 
     public void update(int lifeCount, int points){

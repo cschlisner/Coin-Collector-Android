@@ -71,7 +71,7 @@ public class NextLevelActivity extends Activity {
                 fireCount = 11 + level;
                 playerSpeed = 7 + playerSpeedGained;
             }
-            paint.setTypeface(Typeface.DEFAULT);
+            paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
             paint.setColor(Color.WHITE);
         }
         @Override
