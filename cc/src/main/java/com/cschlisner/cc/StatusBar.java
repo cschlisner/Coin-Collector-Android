@@ -40,7 +40,7 @@ public class StatusBar {
     }
 
     public void draw(Canvas canvas){
-        paint.setColor(Color.DKGRAY);
+        paint.setColor(Color.argb(255,12,10,10));
         canvas.drawRect(bounds, paint);
         paint.setColor(Color.WHITE);
         canvas.drawText(livesString, 10, bounds.bottom-5, paint);

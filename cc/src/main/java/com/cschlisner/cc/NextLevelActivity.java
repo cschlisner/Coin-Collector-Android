@@ -92,7 +92,7 @@ public class NextLevelActivity extends Activity {
                 Thread.sleep(1000);
             } catch (InterruptedException e) { }
             --timer;
-            if (timer > 0) invalidate();
+            if (timer >= 0) invalidate();
             else if (!startedActivity){
                 startedActivity = true;
                 Intent i = new Intent(getContext(), GameActivity.class);

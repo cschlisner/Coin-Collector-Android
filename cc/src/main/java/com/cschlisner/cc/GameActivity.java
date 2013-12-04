@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -16,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class GameActivity extends ActionBarActivity{
+    public static Context gamectx;
     private boolean inPause, startedActivity;
     public enum Direction {up, down, left, right, none}
     private MainThread thread;
@@ -25,11 +28,14 @@ public class GameActivity extends ActionBarActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        gamectx = GameActivity.this;
         GameView gameView = new GameView(this);
         setContentView(gameView);
     }
     @Override
-    public void onBackPressed() {}
+    public void onBackPressed() {
+        onPause();
+    }
 
     @Override
     protected void onPause() {
@@ -44,10 +50,15 @@ public class GameActivity extends ActionBarActivity{
     @Override
     protected void onResume() {
         inPause = false;
+        startedActivity = false;
         thread.setRunning(true);
         super.onResume();
     }
 
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        return false;
+    }
 
     // Thread
     public class MainThread extends Thread {
@@ -79,8 +90,6 @@ public class GameActivity extends ActionBarActivity{
             long timeDiff;
             int sleepTime;
             int framesSkipped;
-
-            sleepTime = 0;
 
             while (running) {
                 canvas = null;
@@ -160,7 +169,8 @@ public class GameActivity extends ActionBarActivity{
             else if (difficulty.equals("med")) bgColor = Color.argb(255, 145-levelHue, 141-levelHue, 29-levelHue);
             else if (difficulty.equals("hard")) bgColor = Color.argb(255, 129-levelHue, 14-levelHue, 14-levelHue);
             statusBar = new StatusBar(context, screenWidth, screenHeight);
-            controls = new ControlField(screenWidth, screenHeight);
+            controls = new ControlField(context, screenWidth, screenHeight);
+            screenWidth -= controls.holder.width();
             player = new Player(context);
             player.posX = screenWidth/2;
             player.posY = screenHeight/2+statusBar.height;
@@ -220,18 +230,17 @@ public class GameActivity extends ActionBarActivity{
                 if (statusBar.pauseButton.bounds.contains(x,y) && !statusBar.pauseButton.pressed){
                     statusBar.pauseButton.pressed = true;
                 }
-                else {
-                    controls.positionField(x,y);
-                    controls.drawField = true;
-                    controls.direction = Direction.none;
+                if (controls.holder.contains(x,y)){
+                    controls.setDirection(x,y);
                 }
             }
             else if (action == MotionEvent.ACTION_UP){
-                controls.drawField = false;
                 controls.direction = Direction.none;
             }
             else {
-                controls.setDirection(x,y);
+                if (controls.holder.contains(x,y)){
+                    controls.setDirection(x,y);
+                }
             }
             return true;
         }
@@ -239,7 +248,6 @@ public class GameActivity extends ActionBarActivity{
         public void render(Canvas canvas) {
             canvas.drawColor(Color.BLACK);
             canvas.drawColor(bgColor);
-            controls.draw(canvas);
             player.draw(canvas);
             for (int i=0; i<fireCount; ++i)
                 fireBall[i].draw(canvas);
@@ -247,7 +255,8 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(player.msg, player.posX, player.posY-10, paint);
+            canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
+            controls.draw(canvas);
             statusBar.draw(canvas);
         }
         public void update() {
@@ -297,12 +306,10 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].update(player.playerRect);
             if (potLevel)
                 potion.update(player.playerRect);
-            player.msg = "";
             if (Collisions.fireCollision){
-                player.msg = "DARN";
+                player.msg = "FUCK";
                 Collisions.fireCollision = false;
                 --lives;
-                if (lives == 0) checkWin();
                 for (int i=0; i<fireCount; ++i){
                     fireBall[i].generate();
                     try {Thread.sleep(500/fireCount);} //wait for each fireball to generate different coordinates
@@ -312,7 +319,7 @@ public class GameActivity extends ActionBarActivity{
                 player.posY = screenHeight/2+statusBar.height;
             }
             if (Collisions.coinCollision){
-                player.msg = "SWEET!";
+                player.msg = "TITS!";
                 score += 100;
                 ++coinsCollected;
                 Collisions.coinCollision = false;

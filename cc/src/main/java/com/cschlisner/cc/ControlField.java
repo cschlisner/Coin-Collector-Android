@@ -1,92 +1,81 @@
 package com.cschlisner.cc;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.shapes.PathShape;
+import android.graphics.Typeface;
 
 /**
  * Created by cole on 11/29/13.
  */
 public class ControlField {
-    private int screenWidth, screenHeight;
-    public Rect centerRect, topRect, rightRect, bottomRect, leftRect;
+    public Bitmap Ri, Le, Up, Do, Nu, imgR, imgL, imgU, imgD, imgN;
+    public Rect bounds, holder;
     public GameActivity.Direction direction = GameActivity.Direction.none;
     private Paint paint;
-    private int topC, rightC, bottomC, leftC;
-    private int selectedC = Color.argb(40, 0, 0, 0), defaultC = Color.argb(40, 150, 150, 150);
-    public boolean drawField = false;
+    private int posX, posY;
     
-    public ControlField(int screenW, int screenH){
-        screenWidth = screenW;
-        screenHeight = screenH;
+    public ControlField(Context context, int screenW, int screenH){
         paint = new Paint();
         paint.setColor(Color.WHITE);
-        topRect = new Rect();
-        bottomRect = new Rect();
-        rightRect = new Rect();
-        leftRect = new Rect();
-        centerRect = new Rect();
-
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
+        Ri = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadr);
+        Le = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadl);
+        Up = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadu);
+        Do = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadd);
+        Nu = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadn);
+        imgR = Bitmap.createScaledBitmap(Ri, screenW/8, screenW/8, true);
+        imgL = Bitmap.createScaledBitmap(Le, screenW/8, screenW/8, true);
+        imgU = Bitmap.createScaledBitmap(Up, screenW/8, screenW/8, true);
+        imgD = Bitmap.createScaledBitmap(Do, screenW/8, screenW/8, true);
+        imgN = Bitmap.createScaledBitmap(Nu, screenW/8, screenW/8, true);
+        holder = new Rect();
+        bounds = new Rect();
+        holder.set(screenW-(screenW/6), 0, screenW, screenH);
+        posX = holder.left+(holder.width()/5);
+        posY = holder.height()/2;
+        bounds.set(posX, posY, posX+imgN.getWidth(), posY+imgN.getHeight());
     }
     
     public void setDirection(int x, int y){
-        if (4*topRect.bottom-y > leftRect.right-x && 4*topRect.bottom-y > x-rightRect.left && y <= topRect.bottom){
+        int top = bounds.top, right = bounds.right, left = bounds.left, bott = bounds.bottom;
+        if ((bott-y) > (right-x) && (bott-y) > (x-left)){
             direction = GameActivity.Direction.up;
         }
-        else if (4*y-bottomRect.top > leftRect.right-x && 4*y-bottomRect.top > x-rightRect.left && y >= bottomRect.top){
-            direction = GameActivity.Direction.down;
-        }
-        else if (x-rightRect.left > topRect.bottom-y && x-rightRect.left > y-bottomRect.top && x >= rightRect.left){
+        else if ((x-left) > (bott-y) && (x-left) > (y-top)){
             direction = GameActivity.Direction.right;
         }
-        else if (leftRect.right-x > topRect.bottom-y && leftRect.right-x > y-bottomRect.top && x <= leftRect.right){
+        else if ((y-top) > (right-x) && (y-top) > (x-left)){
+            direction = GameActivity.Direction.down;
+        }
+        else if ((right-x) > (bott-y) && (right-x) > (y-top)){
             direction = GameActivity.Direction.left;
         }
-        if (centerRect.contains(x,y)) direction = GameActivity.Direction.none;
-    }
-    
-    public void positionField(int x, int y){
-        int RectWidth = (screenWidth/12);
-        int RectHeight = (screenHeight/11);
-        topRect.set(x-(RectHeight+(RectWidth/2)), y-(RectHeight+(RectWidth/2)), x+(RectHeight+(RectWidth/2)), y-RectWidth/2);
-        rightRect.set(x+RectWidth/2, y-(RectHeight+(RectWidth/2)), x+(RectHeight+(RectWidth/2)), y+(RectHeight+(RectWidth/2)));
-        bottomRect.set(x-(RectHeight+(RectWidth/2)), y+RectWidth/2, x+(RectHeight+(RectWidth/2)), y+(RectHeight+(RectWidth/2)));
-        leftRect.set(x-(RectHeight+(RectWidth/2)), y-(RectHeight+(RectWidth/2)), x-RectWidth/2, y+(RectHeight+(RectWidth/2)));
-        centerRect.set(x-RectWidth/2, y-RectWidth/2, x+RectWidth/2, y+RectWidth/2);
     }
 
     public void draw(Canvas canvas){
-        if (drawField){
-            topC = defaultC;
-            rightC = defaultC;
-            bottomC = defaultC;
-            leftC = defaultC;
-            switch (direction){
-                case up:
-                    topC = selectedC;
-                    break;
-                case right:
-                    rightC = selectedC;
-                    break;
-                case left:
-                    leftC = selectedC;
-                    break;
-                case down:
-                    bottomC = selectedC;
-                    break;
-                case none:
-                    break;
-            }
-            paint.setColor(topC);
-            canvas.drawRect(topRect, paint);
-            paint.setColor(rightC);
-            canvas.drawRect(rightRect, paint);
-            paint.setColor(bottomC);
-            canvas.drawRect(bottomRect, paint);
-            paint.setColor(leftC);
-            canvas.drawRect(leftRect, paint);
+        paint.setColor(Color.BLACK);
+        canvas.drawRect(holder, paint);
+        switch (direction){
+            case up:
+                canvas.drawBitmap(imgU, posX, posY, paint);
+                break;
+            case right:
+                canvas.drawBitmap(imgR, posX, posY, paint);
+                break;
+            case left:
+                canvas.drawBitmap(imgL, posX, posY, paint);
+                break;
+            case down:
+                canvas.drawBitmap(imgD, posX, posY, paint);
+                break;
+            case none:
+                canvas.drawBitmap(imgN, posX, posY, paint);
+                break;
         }
     }
 }

@@ -82,7 +82,7 @@ public class PauseActivity extends Activity {
                     titleX -= 30;
                 }
                 else {
-                    pressBack();
+                    onBackPressed();
                     finish();
                 }
             }
@@ -93,6 +93,8 @@ public class PauseActivity extends Activity {
                 }
                 else if (!startNewActivity){
                     startNewActivity = true;
+                    Activity parent = (Activity)GameActivity.gamectx;
+                    parent.finish();
                     Intent i = new Intent(getContext(), TitleScreenActivity.class);
                     startActivity(i);
                     finish();
@@ -100,10 +102,9 @@ public class PauseActivity extends Activity {
             }
         }
     }
-    public void pressBack() {
-        super.onBackPressed();
-    }
 
     @Override
-    public void onBackPressed() {}
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
