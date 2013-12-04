@@ -13,7 +13,7 @@ import android.graphics.Typeface;
  * Created by cole on 11/29/13.
  */
 public class ControlField {
-    public Bitmap Ri, Le, Up, Do, Nu, imgR, imgL, imgU, imgD, imgN;
+    public Bitmap Ri, Le, Up, Do, Nu, imgR, imgL, imgU, imgD, imgN, gl, glow;
     public Rect bounds, holder;
     public GameActivity.Direction direction = GameActivity.Direction.none;
     private Paint paint;
@@ -28,11 +28,13 @@ public class ControlField {
         Up = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadu);
         Do = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadd);
         Nu = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadn);
-        imgR = Bitmap.createScaledBitmap(Ri, screenW/8, screenW/8, true);
+        imgR = Bitmap.createScaledBitmap(Ri, screenW / 8, screenW / 8, true);
         imgL = Bitmap.createScaledBitmap(Le, screenW/8, screenW/8, true);
         imgU = Bitmap.createScaledBitmap(Up, screenW/8, screenW/8, true);
         imgD = Bitmap.createScaledBitmap(Do, screenW/8, screenW/8, true);
         imgN = Bitmap.createScaledBitmap(Nu, screenW/8, screenW/8, true);
+        gl = BitmapFactory.decodeResource(context.getResources(), R.drawable.canvasglow);
+        glow = Bitmap.createScaledBitmap(gl, screenW/80, screenH, true);
         holder = new Rect();
         bounds = new Rect();
         holder.set(screenW-(screenW/6), 0, screenW, screenH);
@@ -60,6 +62,7 @@ public class ControlField {
     public void draw(Canvas canvas){
         paint.setColor(Color.BLACK);
         canvas.drawRect(holder, paint);
+        canvas.drawBitmap(glow, holder.left, holder.top, paint);
         switch (direction){
             case up:
                 canvas.drawBitmap(imgU, posX, posY, paint);

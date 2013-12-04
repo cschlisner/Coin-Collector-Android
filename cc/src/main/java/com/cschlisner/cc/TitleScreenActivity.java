@@ -42,6 +42,10 @@ public class TitleScreenActivity extends ActionBarActivity {
             hardButton = new TextContainer(context, "hard mode", 60, (screenWidth/2)+(screenWidth/20),
                     (screenHeight/2)+(screenHeight/6));
 
+            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
+            paint.setTextSize(120);
+            paint.setColor(Color.WHITE);
+
         }
 
         @Override
@@ -49,9 +53,6 @@ public class TitleScreenActivity extends ActionBarActivity {
             easyButton.draw(canvas);
             mediumButton.draw(canvas);
             hardButton.draw(canvas);
-            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
-            paint.setTextSize(120);
-            paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);
             if (easyButton.pressed || mediumButton.pressed || hardButton.pressed){
                 update();

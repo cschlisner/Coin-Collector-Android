@@ -38,15 +38,16 @@ public class PauseActivity extends Activity {
             resumeButton = new TextContainer(context, "resume", 60, (screenWidth/2)-(screenWidth/20),
                     (screenHeight/2)-(screenHeight/6));
             menuButton = new TextContainer(context, "main menu", 60, (screenWidth/2), screenHeight/2);
+
+            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
+            paint.setTextSize(120);
+            paint.setColor(Color.WHITE);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             resumeButton.draw(canvas);
             menuButton.draw(canvas);
-            paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
-            paint.setTextSize(120);
-            paint.setColor(Color.WHITE);
             canvas.drawText(title, titleX, 120, paint);
             if (resumeButton.pressed || menuButton.pressed){
                 update();

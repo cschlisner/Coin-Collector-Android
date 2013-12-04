@@ -41,8 +41,8 @@ public class NextLevelActivity extends Activity {
             screenWidth = metrics.widthPixels;
             screenHeight = metrics.heightPixels;
             livesBMP = BitmapFactory.decodeResource(getResources(), R.drawable.lives);
-            coinBMP = BitmapFactory.decodeResource(getResources(), R.drawable.coin);
-            fireBMP = BitmapFactory.decodeResource(getResources(), R.drawable.fireball);
+            coinBMP = BitmapFactory.decodeResource(getResources(), R.drawable.c5);
+            fireBMP = BitmapFactory.decodeResource(getResources(), R.drawable.fire1);
 
             Intent intent = getIntent();
             mode = intent.getStringExtra("DIFFICULTY");

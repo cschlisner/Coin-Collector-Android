@@ -13,15 +13,16 @@ import java.util.Random;
  * Created by cole on 12/1/13.
  */
 public class Potion {
-    private Bitmap image;
-    public boolean collected;
-    private int posX, posY;
+    private Bitmap image1, image2;
+    public boolean collected, switchImage;
+    private int posX, posY, animate;
     int timer;
     private Rect bounds = new Rect();
     int scrW, scrH, offset;
     private Paint paint = new Paint();
     public Potion(Context context, int sw, int sh, int sBarOffset){
-        image = BitmapFactory.decodeResource(context.getResources(), R.drawable.powerup);
+        image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.pot1);
+        image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.pot2);
         scrW = sw;
         scrH = sh;
         offset = sBarOffset;
@@ -30,16 +31,16 @@ public class Potion {
 
     private void generate(){
         Random rand = new Random();
-        posX = rand.nextInt(scrW-image.getWidth());
-        int randY = rand.nextInt(scrH-image.getHeight());
+        posX = rand.nextInt(scrW-image1.getWidth());
+        int randY = rand.nextInt(scrH-image1.getHeight());
         if (randY < offset) posY = offset+randY;
         else posY = randY;
-        bounds.set(posX, posY, posX+image.getWidth(), posY+image.getHeight());
+        bounds.set(posX, posY, posX+image1.getWidth(), posY+image1.getHeight());
     }
 
     public void update(Rect playerRect){
         if (!collected){
-            bounds.set(posX, posY, posX+image.getWidth(), posY+image.getHeight());
+            bounds.set(posX, posY, posX+image1.getWidth(), posY+image1.getHeight());
             if (bounds.intersect(playerRect)){
                 collected = true;
                 Collisions.potionCollision = true;
@@ -54,7 +55,14 @@ public class Potion {
     }
 
     public void draw(Canvas canvas){
-        if (!collected)
-            canvas.drawBitmap(image, posX, posY, paint);
+        if (!collected){
+            ++animate;
+            if (animate >= 10){
+                switchImage = !switchImage;
+                animate = 0;
+            }
+            if (switchImage) canvas.drawBitmap(image1, posX, posY, paint);
+            else canvas.drawBitmap(image2, posX, posY, paint);
+        }
     }
 }

@@ -13,21 +13,23 @@ import java.util.Random;
  * Created by cole on 11/30/13.
  */
 public class FireBall{
-    private Bitmap image;
+    private Bitmap image1, image2;
     private Paint paint = new Paint();
     private int velocityX, velocityY, maxSpeed, screenWidth, screenHeight,
-                imageWidth, imageHeight, offset;
+                imageWidth, imageHeight, offset, animate;
     private float posX, posY;
+    private boolean switchImage;
     private Rect bounds = new Rect();
 
     public FireBall(Context context, int speed, int sw, int sh, int sBarOffset){
-        image = BitmapFactory.decodeResource(context.getResources(), R.drawable.fireball);
+        image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire1);
+        image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire2);
         maxSpeed = speed;
         screenWidth = sw;
         screenHeight = sh;
         offset = sBarOffset;
-        imageWidth = image.getWidth();
-        imageHeight = image.getHeight();
+        imageWidth = image1.getWidth();
+        imageHeight = image1.getHeight();
         generate();
     }
 
@@ -73,7 +75,13 @@ public class FireBall{
     }
 
     public void draw(Canvas canvas){
+        ++animate;
+        if (animate >= 6){
+            switchImage = !switchImage;
+            animate = 0;
+        }
         bounds.set((int)posX, (int)posY, (int)posX+imageWidth, (int)posY+imageHeight);
-        canvas.drawBitmap(image, posX, posY, paint);
+        if (switchImage) canvas.drawBitmap(image1, posX, posY, paint);
+        else canvas.drawBitmap(image2, posX, posY, paint);
     }
 }

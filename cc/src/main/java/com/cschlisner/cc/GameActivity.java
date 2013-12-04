@@ -256,6 +256,7 @@ public class GameActivity extends ActionBarActivity{
             if (potLevel)
                 potion.draw(canvas);
             canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
+            player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
         }
@@ -310,6 +311,7 @@ public class GameActivity extends ActionBarActivity{
                 player.msg = "FUCK";
                 Collisions.fireCollision = false;
                 --lives;
+                if (lives == 0) checkWin();
                 for (int i=0; i<fireCount; ++i){
                     fireBall[i].generate();
                     try {Thread.sleep(500/fireCount);} //wait for each fireball to generate different coordinates
