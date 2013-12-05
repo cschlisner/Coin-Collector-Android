@@ -15,7 +15,7 @@ public class TextContainer {
     public Rect bounds = new Rect();
     public Paint paint = new Paint();
     public boolean pressed;
-    private Rect textBounds = new Rect();
+    public Rect textBounds = new Rect();
     private String text;
     public TextContainer(Context context, String Text, int Size, int x, int y){
         paint.setTextSize(Size);

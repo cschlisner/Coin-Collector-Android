@@ -11,7 +11,6 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,7 +19,7 @@ public class NextLevelActivity extends Activity {
     private String mode;
     private int level, timer = 3, updates, lives, coins, score, fireSpeed,
             fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight;
-    private static final String TAG = NextLevelActivity.class.getSimpleName();
+    private boolean runTimer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,12 +28,14 @@ public class NextLevelActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         NextLevelView nextLevelView = new NextLevelView(this);
         setContentView(nextLevelView);
+        runTimer = false;
     }
 
     public class NextLevelView extends View {
         private Paint paint = new Paint();
         private Bitmap livesBMP, coinBMP, fireBMP;
         private boolean startedActivity;
+        private int draws;
         public NextLevelView(Context context){
             super(context);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -46,7 +47,7 @@ public class NextLevelActivity extends Activity {
 
             Intent intent = getIntent();
             mode = intent.getStringExtra("DIFFICULTY");
-            Collisions.mode = mode;
+            Globals.mode = mode;
             level = intent.getIntExtra("LEVEL", 1);
             playerSpeedGained = intent.getIntExtra("SPEED", 0);
             score = intent.getIntExtra("SCORE", 0);
@@ -88,26 +89,28 @@ public class NextLevelActivity extends Activity {
 
             paint.setTextSize(100);
             canvas.drawText(String.format("%d", timer),  screenWidth/2, screenHeight/2-screenHeight/4, paint);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) { }
-            --timer;
-            if (timer >= 0) invalidate();
-            else if (!startedActivity){
-                startedActivity = true;
-                Intent i = new Intent(getContext(), GameActivity.class);
-                i.putExtra("LEVEL", level);
-                i.putExtra("LIVES", lives);
-                i.putExtra("COINS", coins);
-                i.putExtra("FIRESPEED", fireSpeed);
-                i.putExtra("FIRECOUNT", fireCount);
-                i.putExtra("PLAYERSPEED", playerSpeed);
-                i.putExtra("DIFFICULTY", mode);
-                i.putExtra("SCORE", score);
-                startActivity(i);
-                Log.d(TAG, "started gameActivity");
-                finish();
+            ++draws;
+            if (draws >= ((timer == 0)?0:50)){
+                --timer;
+                draws = 0;
             }
+            if (timer < 0){
+                if (!startedActivity){
+                    startedActivity = true;
+                    Intent i = new Intent(getContext(), GameActivity.class);
+                    i.putExtra("LEVEL", level);
+                    i.putExtra("LIVES", lives);
+                    i.putExtra("COINS", coins);
+                    i.putExtra("FIRESPEED", fireSpeed);
+                    i.putExtra("FIRECOUNT", fireCount);
+                    i.putExtra("PLAYERSPEED", playerSpeed);
+                    i.putExtra("DIFFICULTY", mode);
+                    i.putExtra("SCORE", score);
+                    startActivity(i);
+                    finish();
+                }
+            }
+            else invalidate();
         }
     }
 }

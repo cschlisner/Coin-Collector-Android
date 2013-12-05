@@ -4,10 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.RectF;
 
 import java.util.Random;
 
@@ -19,7 +17,7 @@ public class Coin {
     private Paint paint = new Paint();
     private int posX, posY, animate, switchImage;
     public boolean collected;
-    private Rect bounds = new Rect();
+    private RectF bounds = new RectF();
     public Coin(Context context, int sw, int sh, int sBarOffset){
         images[0] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c1);
         images[1] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c2);
@@ -34,17 +32,17 @@ public class Coin {
 
     private void generate(int scrW, int scrH, int offset){
         Random rand = new Random();
-        posX = rand.nextInt(scrW-images[4].getWidth());
-        int randY = rand.nextInt(scrH-images[4].getHeight());
-        if (randY < offset) posY = offset+randY;
-        else posY = randY;
-        bounds.set(posX, posY, posX + images[4].getWidth(), posY + images[4].getHeight());
+        posX = rand.nextInt(scrW-images[0].getWidth());
+        int randY = rand.nextInt(scrH-images[0].getHeight());
+        posY = (randY < offset) ? offset+randY : randY;
+        bounds.set(posX, posY, posX + images[0].getWidth(), posY + images[0].getHeight());
+        switchImage = rand.nextInt(6);
     }
 
-    public void update(Rect playerRect){
+    public void update(RectF playerRect){
         if (!collected){
             if (bounds.intersect(playerRect)){
-                Collisions.coinCollision = true;
+                ++Globals.coinCollisions;
                 collected = true;
                 bounds.set(0,0,0,0);
             }
@@ -54,12 +52,12 @@ public class Coin {
     public void draw(Canvas canvas){
         if (!collected){
             ++animate;
-            if (animate >= 4){
+            if (animate == 5){
                 if (switchImage < 7) ++switchImage;
                 else switchImage = 0;
                 animate = 0;
             }
-            canvas.drawBitmap(images[switchImage], posX, posY-(18 - images[switchImage].getHeight()), paint);
+            canvas.drawBitmap(images[switchImage], posX, posY, paint);
         }
     }
 }

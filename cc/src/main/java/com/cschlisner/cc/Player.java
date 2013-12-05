@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 
 /**
  * Created by cole on 11/30/13.
@@ -20,7 +21,7 @@ public class Player {
     public boolean moving = false;
     public float posX, posY;
     private Paint paint;
-    public Rect playerRect = new Rect();
+    public RectF playerRect = new RectF();
     public boolean walkSwitch = true;
     public String msg = " ";
     private int walkT, imgW, imgH;
@@ -58,7 +59,7 @@ public class Player {
     }
 
     public void draw(Canvas canvas){
-        playerRect.set((int)posX, (int)posY, (int)posX+imgW, (int)posY+imgH);
+        playerRect.set(posX, posY, posX+imgW, posY+imgH);
         switch (direction){
             case up:
                 walk(canvas, ur, ul, us);

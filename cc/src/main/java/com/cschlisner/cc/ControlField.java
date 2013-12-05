@@ -19,7 +19,8 @@ public class ControlField {
     private Paint paint;
     private int posX, posY;
     
-    public ControlField(Context context, int screenW, int screenH){
+    public ControlField(Context context, int screenW, int screenH, float screenPercent){
+        int scnPct = Math.round(100/screenPercent);
         paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
@@ -28,17 +29,17 @@ public class ControlField {
         Up = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadu);
         Do = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadd);
         Nu = BitmapFactory.decodeResource(context.getResources(), R.drawable.dpadn);
-        imgR = Bitmap.createScaledBitmap(Ri, screenW / 8, screenW / 8, true);
-        imgL = Bitmap.createScaledBitmap(Le, screenW/8, screenW/8, true);
-        imgU = Bitmap.createScaledBitmap(Up, screenW/8, screenW/8, true);
-        imgD = Bitmap.createScaledBitmap(Do, screenW/8, screenW/8, true);
-        imgN = Bitmap.createScaledBitmap(Nu, screenW/8, screenW/8, true);
+        imgR = Bitmap.createScaledBitmap(Ri, screenW/scnPct, screenW/scnPct, true);
+        imgL = Bitmap.createScaledBitmap(Le, screenW/scnPct, screenW/scnPct, true);
+        imgU = Bitmap.createScaledBitmap(Up, screenW/scnPct, screenW/scnPct, true);
+        imgD = Bitmap.createScaledBitmap(Do, screenW/scnPct, screenW/scnPct, true);
+        imgN = Bitmap.createScaledBitmap(Nu, screenW/scnPct, screenW/scnPct, true);
         gl = BitmapFactory.decodeResource(context.getResources(), R.drawable.canvasglow);
         glow = Bitmap.createScaledBitmap(gl, screenW/80, screenH, true);
         holder = new Rect();
         bounds = new Rect();
-        holder.set(screenW-(screenW/6), 0, screenW, screenH);
-        posX = holder.left+(holder.width()/5);
+        holder.set(screenW-(screenW/scnPct), 0, screenW, screenH);
+        posX = holder.left;
         posY = holder.height()/2;
         bounds.set(posX, posY, posX+imgN.getWidth(), posY+imgN.getHeight());
     }

@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 
 import java.util.Random;
 
@@ -17,7 +17,7 @@ public class Potion {
     public boolean collected, switchImage;
     private int posX, posY, animate;
     int timer;
-    private Rect bounds = new Rect();
+    private RectF bounds = new RectF();
     int scrW, scrH, offset;
     private Paint paint = new Paint();
     public Potion(Context context, int sw, int sh, int sBarOffset){
@@ -33,17 +33,16 @@ public class Potion {
         Random rand = new Random();
         posX = rand.nextInt(scrW-image1.getWidth());
         int randY = rand.nextInt(scrH-image1.getHeight());
-        if (randY < offset) posY = offset+randY;
-        else posY = randY;
+        posY = (randY < offset) ? offset+randY : randY;
         bounds.set(posX, posY, posX+image1.getWidth(), posY+image1.getHeight());
     }
 
-    public void update(Rect playerRect){
+    public void update(RectF playerRect){
         if (!collected){
             bounds.set(posX, posY, posX+image1.getWidth(), posY+image1.getHeight());
             if (bounds.intersect(playerRect)){
                 collected = true;
-                Collisions.potionCollision = true;
+                Globals.potionCollision = true;
                 bounds.set(0,0,0,0);
             }
             ++timer;

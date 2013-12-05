@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 
 import java.util.Random;
 
@@ -14,16 +16,18 @@ import java.util.Random;
  */
 public class FireBall{
     private Bitmap image1, image2;
-    private Paint paint = new Paint();
     private int velocityX, velocityY, maxSpeed, screenWidth, screenHeight,
                 imageWidth, imageHeight, offset, animate;
     private float posX, posY;
     private boolean switchImage;
-    private Rect bounds = new Rect();
+    private RectF bounds = new RectF();
+    private Matrix matrix = new Matrix();
+    Paint paint = new Paint();
 
     public FireBall(Context context, int speed, int sw, int sh, int sBarOffset){
         image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire1);
         image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire2);
+        paint.setColor(Color.WHITE);
         maxSpeed = speed;
         screenWidth = sw;
         screenHeight = sh;
@@ -56,7 +60,7 @@ public class FireBall{
             velocityX = randS;
             velocityY = remainderN;
             posX = rand.nextInt(screenWidth-imageWidth);
-            posY = screenHeight-imageHeight;
+            posY = screenHeight;
         }
         else if (screenEdge == 3){
             velocityY = randS;
@@ -64,14 +68,22 @@ public class FireBall{
             posX = 0;
             posY = rand.nextInt(screenHeight-imageHeight);
         }
+
     }
 
-    public void update(Rect playerRect){
-        if (bounds.intersect(playerRect)){Collisions.fireCollision = true;}
+    public void update(RectF playerRect){
+        bounds.set(posX, posY, posX+imageWidth-5, posY+imageHeight+3);
+        if (bounds.intersect(playerRect)){
+            Globals.fireCollision = true;}
         if (posX < screenWidth && posX >= 0){ posX += velocityX;}
         else generate();
         if (posY < screenHeight && posY >= offset){posY += velocityY;}
         else generate();
+        matrix.reset();
+        float offsetX = posX+imageWidth, offsetY = posY+imageWidth;
+
+            matrix.setTranslate((velocityX > 0) ? offsetX : posX , (velocityY < 0) ? offsetY : posY);
+            matrix.preScale((velocityX > 0) ? -1.0f : 1.0f, (velocityY < 0) ? -1.0f : 1.0f); //flip vertically
     }
 
     public void draw(Canvas canvas){
@@ -80,8 +92,7 @@ public class FireBall{
             switchImage = !switchImage;
             animate = 0;
         }
-        bounds.set((int)posX, (int)posY, (int)posX+imageWidth, (int)posY+imageHeight);
-        if (switchImage) canvas.drawBitmap(image1, posX, posY, paint);
-        else canvas.drawBitmap(image2, posX, posY, paint);
+        if (switchImage) canvas.drawBitmap(image1, matrix, null);
+        else canvas.drawBitmap(image2, matrix, null);
     }
 }

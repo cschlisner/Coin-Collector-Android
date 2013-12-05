@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -169,7 +168,16 @@ public class GameActivity extends ActionBarActivity{
             else if (difficulty.equals("med")) bgColor = Color.argb(255, 145-levelHue, 141-levelHue, 29-levelHue);
             else if (difficulty.equals("hard")) bgColor = Color.argb(255, 129-levelHue, 14-levelHue, 14-levelHue);
             statusBar = new StatusBar(context, screenWidth, screenHeight);
-            controls = new ControlField(context, screenWidth, screenHeight);
+
+            // DELETE ME
+            Globals.controlSize = 2;
+            // DELETE ME
+
+            float cSize = 0;
+            if (Globals.controlSize == 1) cSize = 12.5f;
+            else if (Globals.controlSize == 2) cSize = 16.67f;
+            else if (Globals.controlSize == 3) cSize = 25f;
+            controls = new ControlField(context, screenWidth, screenHeight, cSize);
             screenWidth -= controls.holder.width();
             player = new Player(context);
             player.posX = screenWidth/2;
@@ -190,8 +198,7 @@ public class GameActivity extends ActionBarActivity{
         }
 
         @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                                   int height) {
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         }
 
         @Override
@@ -255,7 +262,7 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
+            canvas.drawText(Integer.toString(coinsCollected), player.posX-5, player.posY-10, paint);
             player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
@@ -307,35 +314,34 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].update(player.playerRect);
             if (potLevel)
                 potion.update(player.playerRect);
-            if (Collisions.fireCollision){
-                player.msg = "FUCK";
-                Collisions.fireCollision = false;
+            if (Globals.fireCollision){
+                player.msg = "!";
+                Globals.fireCollision = false;
                 --lives;
                 if (lives == 0) checkWin();
                 for (int i=0; i<fireCount; ++i){
                     fireBall[i].generate();
-                    try {Thread.sleep(500/fireCount);} //wait for each fireball to generate different coordinates
+                    try {Thread.sleep(500/fireCount);}
                     catch (InterruptedException e) { }
                 }
                 player.posX = screenWidth/2;
                 player.posY = screenHeight/2+statusBar.height;
             }
-            if (Collisions.coinCollision){
-                player.msg = "TITS!";
-                score += 100;
-                ++coinsCollected;
-                Collisions.coinCollision = false;
+            if (Globals.coinCollisions > 0){
+                score += 100*Globals.coinCollisions;
+                coinsCollected += Globals.coinCollisions;
+                checkWin();
+                Globals.coinCollisions = 0;
             }
-            if (Collisions.potionCollision){
-                player.msg = "YISSSSS!";
+            if (Globals.potionCollision){
                 score += 200;
                 ++playerSpeed;
-                Collisions.potionCollision = false;
+                Globals.potionCollision = false;
             }
         }
         private void checkWin(){
             if (!startedActivity){
-                if (coinsCollected == coinCount){
+                if (coinsCollected >= coinCount){
                     startedActivity = true;
                     Intent i = new Intent(getContext(), NextLevelActivity.class);
                     i.putExtra("DIFFICULTY", difficulty);
@@ -349,6 +355,7 @@ public class GameActivity extends ActionBarActivity{
                 else if (lives <= 0){
                     startedActivity = true;
                     Intent i = new Intent(getContext(), GameOverActivity.class);
+                    i.putExtra("SCORE", score);
                     getContext().startActivity(i);
                     thread.setRunning(false);
                     finish();
