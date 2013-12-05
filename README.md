@@ -3,10 +3,12 @@ CoinCollector
 
 Cole's bad ass Android game. Try it out, mate.
 
-![menu](http://coincollector.s3.amazonaws.com/screenshots/menu.png)
+![menu](https://www.dropbox.com/sh/yf2pb0bny8himsu/61zj9395J6)
 
-![countdown](http://coincollector.s3.amazonaws.com/screenshots/countdown.png)
+![countdown](https://www.dropbox.com/sh/yf2pb0bny8himsu/61zj9395J6)
 
-![play1](http://coincollector.s3.amazonaws.com/screenshots/play1.png)
+![play1](https://www.dropbox.com/s/8yzxc0i43tlcg1t/GAN.png)
 
-![play2](http://coincollector.s3.amazonaws.com/screenshots/play2.png)
+![play2](https://www.dropbox.com/s/irxbh59pnl1a80a/GAR.png)
+
+![play3](https://www.dropbox.com/s/u8lfdykdfosthuw/GAL.png)
