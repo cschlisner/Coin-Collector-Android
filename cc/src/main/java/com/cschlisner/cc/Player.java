@@ -18,13 +18,14 @@ public class Player {
                    lr, ll, ls,
                    dr, dl, ds;
     public GameActivity.Direction direction = GameActivity.Direction.right;
-    public boolean moving = false;
+    private boolean alphaSwitch = false;
+    public int blinks;
     public float posX, posY;
     private Paint paint;
     public RectF playerRect = new RectF();
-    public boolean walkSwitch = true;
+    public boolean walkSwitch = true, moving = false, invincible;
     public String msg = " ";
-    private int walkT, imgW, imgH;
+    private int walkT, blinkT, imgW, imgH;
     public Player(Context context){
         ur = BitmapFactory.decodeResource(context.getResources(), R.drawable.ur);
         ul = BitmapFactory.decodeResource(context.getResources(), R.drawable.ul);
@@ -60,6 +61,15 @@ public class Player {
 
     public void draw(Canvas canvas){
         playerRect.set(posX, posY, posX+imgW, posY+imgH);
+        if (invincible){
+            ++blinkT;
+            if (blinkT > 10){
+                alphaSwitch = !alphaSwitch;
+                paint.setAlpha((alphaSwitch)?0:255);
+                blinkT = 0;
+                ++blinks;
+            }
+        }
         switch (direction){
             case up:
                 walk(canvas, ur, ul, us);

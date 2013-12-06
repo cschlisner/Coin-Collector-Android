@@ -1,22 +1,27 @@
 package com.cschlisner.cc;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
-public class GameActivity extends ActionBarActivity{
+public class GameActivity extends Activity {
     public static Context gamectx;
     private boolean inPause, startedActivity;
     public enum Direction {up, down, left, right, none}
@@ -30,10 +35,15 @@ public class GameActivity extends ActionBarActivity{
         gamectx = GameActivity.this;
         GameView gameView = new GameView(this);
         setContentView(gameView);
+
     }
     @Override
     public void onBackPressed() {
         onPause();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
     }
 
     @Override
@@ -132,7 +142,7 @@ public class GameActivity extends ActionBarActivity{
             SurfaceHolder.Callback {
 
         private int level, lives, score, coinCount, coinsCollected, fireSpeed,
-                    fireCount, playerSpeed, screenWidth, screenHeight, bgColor;
+                    fireCount, playerSpeed, screenWidth, screenHeight, bgColor, highScore;
         private boolean potLevel;
         private String difficulty;
         private StatusBar statusBar;
@@ -142,8 +152,10 @@ public class GameActivity extends ActionBarActivity{
         private FireBall[] fireBall;
         private Coin[] coin;
         private Potion potion;
+        private Context context;
         public GameView(Context context) {
             super(context);
+            this.context = context;
             getHolder().addCallback(this);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
@@ -157,17 +169,18 @@ public class GameActivity extends ActionBarActivity{
             difficulty = intent.getStringExtra("DIFFICULTY");
             level = intent.getIntExtra("LEVEL", 0);
             score = intent.getIntExtra("SCORE", 0);
+            highScore = intent.getIntExtra("HSCORE", 0);
             lives = intent.getIntExtra("LIVES", 0);
             coinCount = intent.getIntExtra("COINS", 0);
             fireSpeed = intent.getIntExtra("FIRESPEED", 0);
             fireCount = intent.getIntExtra("FIRECOUNT", 0);
             playerSpeed = intent.getIntExtra("PLAYERSPEED", 0);
             if (level%2==0) potLevel = true;
-            int levelHue = 3*level;
+            int levelHue = level;
             if (difficulty.equals("easy")) bgColor = Color.argb(255, 44-levelHue, 145-levelHue, 29-levelHue);
-            else if (difficulty.equals("med")) bgColor = Color.argb(255, 145-levelHue, 141-levelHue, 29-levelHue);
+            else if (difficulty.equals("medium")) bgColor = Color.argb(255, 29-levelHue, 29-levelHue, 141-levelHue);
             else if (difficulty.equals("hard")) bgColor = Color.argb(255, 129-levelHue, 14-levelHue, 14-levelHue);
-            statusBar = new StatusBar(context, screenWidth, screenHeight);
+            statusBar = new StatusBar(context, level, screenWidth, screenHeight);
 
             // DELETE ME
             Globals.controlSize = 2;
@@ -177,7 +190,7 @@ public class GameActivity extends ActionBarActivity{
             if (Globals.controlSize == 1) cSize = 12.5f;
             else if (Globals.controlSize == 2) cSize = 16.67f;
             else if (Globals.controlSize == 3) cSize = 25f;
-            controls = new ControlField(context, screenWidth, screenHeight, cSize);
+            controls = new ControlField(context, screenWidth, screenHeight, cSize, true);
             screenWidth -= controls.holder.width();
             player = new Player(context);
             player.posX = screenWidth/2;
@@ -193,8 +206,8 @@ public class GameActivity extends ActionBarActivity{
             potion = new Potion(context, screenHeight, screenWidth, statusBar.height);
 
             thread = new MainThread(getHolder(), this);
-
             setFocusable(true);
+
         }
 
         @Override
@@ -234,8 +247,8 @@ public class GameActivity extends ActionBarActivity{
             int y = (int)event.getY();
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN){
-                if (statusBar.pauseButton.bounds.contains(x,y) && !statusBar.pauseButton.pressed){
-                    statusBar.pauseButton.pressed = true;
+                if (controls.pauseButton.bounds.contains(x,y) && !controls.pauseButton.pressed){
+                    controls.pauseButton.pressed = true;
                 }
                 if (controls.holder.contains(x,y)){
                     controls.setDirection(x,y);
@@ -262,14 +275,16 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(Integer.toString(coinsCollected), player.posX-5, player.posY-10, paint);
+            canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
             player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
         }
         public void update() {
-            if (statusBar.pauseButton.pressed) {
-                statusBar.pauseButton.pressed = false;
+            // make the player invincible right away
+            player.invincible = (player.blinks < 6);
+            if (controls.pauseButton.pressed) {
+                controls.pauseButton.pressed = false;
                 thread.setRunning(false);
                 if (!inPause){
                     startedActivity = true;
@@ -314,7 +329,7 @@ public class GameActivity extends ActionBarActivity{
                 coin[i].update(player.playerRect);
             if (potLevel)
                 potion.update(player.playerRect);
-            if (Globals.fireCollision){
+            if (Globals.fireCollision && !player.invincible){
                 player.msg = "!";
                 Globals.fireCollision = false;
                 --lives;
@@ -361,7 +376,16 @@ public class GameActivity extends ActionBarActivity{
                     finish();
                 }
             }
+            if (score > highScore && !Globals.highScoreSet){
+                Globals.highScoreSet = true;
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast toast = Toast.makeText(getContext(), "new highscore!", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                });
+            }
         }
 
-    }
+    } 
 }

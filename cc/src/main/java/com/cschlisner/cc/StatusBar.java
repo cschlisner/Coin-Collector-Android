@@ -15,13 +15,12 @@ import android.graphics.drawable.BitmapDrawable;
  */
 public class StatusBar {
     private Rect bounds = new Rect(), textBounds = new Rect();
-    private int lives, score, imageWidth, imageHeight;
+    private int lives, score, level, imageWidth, imageHeight;
     private Paint paint = new Paint();
     private Bitmap livesBmp;
     private String livesString = "Lives: ", scoreString = "Score: %d";
     public int height;
-    public TextContainer pauseButton;
-    public StatusBar(Context context, int sw, int sh){
+    public StatusBar(Context context, int level, int sw, int sh){
         livesBmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lives);
         imageWidth = livesBmp.getWidth()+5;
         imageHeight = livesBmp.getHeight();
@@ -30,8 +29,7 @@ public class StatusBar {
         paint.getTextBounds(livesString, 0, livesString.length(), textBounds);
         bounds.set(0, 0, sw, textBounds.height() + 10);
         height = bounds.height();
-
-        pauseButton = new TextContainer(context, "pause", 40, bounds.centerX()+350, bounds.top);
+        this.level = level;
     }
 
     public void update(int lifeCount, int points){
@@ -49,6 +47,7 @@ public class StatusBar {
                     (bounds.bottom-imageHeight)-5, paint);
         canvas.drawText(String.format(scoreString, score),
                 bounds.centerX()-50, bounds.bottom-5, paint);
-        pauseButton.draw(canvas);
+        canvas.drawText(String.format(Globals.mode+": %d", level),
+                bounds.width()-paint.measureText(Globals.mode, 0, Globals.mode.length())-100, bounds.bottom-7, paint);
     }
 }

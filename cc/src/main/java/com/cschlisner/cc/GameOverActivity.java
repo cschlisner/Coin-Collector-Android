@@ -46,6 +46,7 @@ public class GameOverActivity extends Activity {
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
             // high scores
+            Globals.highScoreSet = false;
             SharedPreferences prefs = context.getSharedPreferences("highScore", Context.MODE_PRIVATE);
             oldScore = prefs.getInt(Globals.mode, 0);
             if(gameScore > oldScore ){

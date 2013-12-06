@@ -18,7 +18,7 @@ import android.view.WindowManager;
 public class NextLevelActivity extends Activity {
     private String mode;
     private int level, timer = 3, updates, lives, coins, score, fireSpeed,
-            fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight;
+            fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight, highscore;
     private boolean runTimer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,20 +57,23 @@ public class NextLevelActivity extends Activity {
                 fireSpeed = 8;
                 fireCount = 9 + level;
                 playerSpeed = 7 + playerSpeedGained;
+                highscore = Globals.hse;
             }
-            else if (mode.equals("med")){
-                lives = 5 + level;
+            else if (mode.equals("medium")){
+                lives = 5+ (level/3);
                 coins = 11 + level;
                 fireSpeed = 9;
                 fireCount = 10 + level;
                 playerSpeed = 7 + playerSpeedGained;
+                highscore = Globals.hsm;
             }
             else if (mode.equals("hard")){
-                lives = 6 + level;
+                lives = 6 + (level/3);
                 coins = 12 + level;
                 fireSpeed = 10;
                 fireCount = 11 + level;
                 playerSpeed = 7 + playerSpeedGained;
+                highscore = Globals.hsh;
             }
             paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
             paint.setColor(Color.WHITE);
@@ -106,6 +109,7 @@ public class NextLevelActivity extends Activity {
                     i.putExtra("PLAYERSPEED", playerSpeed);
                     i.putExtra("DIFFICULTY", mode);
                     i.putExtra("SCORE", score);
+                    i.putExtra("HSCORE", highscore);
                     startActivity(i);
                     finish();
                 }

@@ -58,6 +58,9 @@ public class TitleScreenActivity extends ActionBarActivity {
             easyScore = prefs.getInt("easy", 0);
             medScore = prefs.getInt("medium", 0);
             hardScore = prefs.getInt("hard", 0);
+            Globals.hse = easyScore;
+            Globals.hsm = medScore;
+            Globals.hsh = hardScore;
             titlePaint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             lx = 100;
             ly = ((screenHeight/2)+(screenHeight/6))-(logo.getHeight()*lscale)+100;
