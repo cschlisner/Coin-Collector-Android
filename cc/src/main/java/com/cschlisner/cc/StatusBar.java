@@ -15,12 +15,13 @@ import android.graphics.drawable.BitmapDrawable;
  */
 public class StatusBar {
     private Rect bounds = new Rect(), textBounds = new Rect();
-    private int lives, score, level, imageWidth, imageHeight;
+    private int lives, score, level, imageWidth, imageHeight, sw, posX, posY;
     private Paint paint = new Paint();
     private Bitmap livesBmp;
     private String livesString = "Lives: ", scoreString = "Score: %d";
     public int height;
-    public StatusBar(Context context, int level, int sw, int sh){
+    public StatusBar(Context context, int level, int sw){
+        this.sw = sw;
         livesBmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lives);
         imageWidth = livesBmp.getWidth()+5;
         imageHeight = livesBmp.getHeight();
@@ -32,7 +33,10 @@ public class StatusBar {
         this.level = level;
     }
 
-    public void update(int lifeCount, int points){
+    public void update(int x, int y, int lifeCount, int points){
+        bounds.set(x, y, x+sw, y+textBounds.height() + 10);
+        posX = x;
+        posY = y;
         lives = lifeCount;
         score = points;
     }
@@ -41,13 +45,12 @@ public class StatusBar {
         paint.setColor(Color.argb(255,12,10,10));
         canvas.drawRect(bounds, paint);
         paint.setColor(Color.WHITE);
-        canvas.drawText(livesString, 10, bounds.bottom-5, paint);
+        canvas.drawText(livesString, posX+10, bounds.bottom-5, paint);
         for (int i = 0; i<lives; ++i)
-            canvas.drawBitmap(livesBmp, paint.measureText(livesString, 0, 7)+10+(i*imageWidth),
+            canvas.drawBitmap(livesBmp, posX+paint.measureText(livesString, 0, 7)+10+(i*imageWidth),
                     (bounds.bottom-imageHeight)-5, paint);
-        canvas.drawText(String.format(scoreString, score),
-                bounds.centerX()-50, bounds.bottom-5, paint);
+        canvas.drawText(String.format(scoreString, score), bounds.centerX()-50, bounds.bottom-5, paint);
         canvas.drawText(String.format(Globals.mode+": %d", level),
-                bounds.width()-paint.measureText(Globals.mode, 0, Globals.mode.length())-100, bounds.bottom-7, paint);
+                posX+bounds.width()-paint.measureText(Globals.mode, 0, Globals.mode.length())-100, bounds.bottom-7, paint);
     }
 }

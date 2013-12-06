@@ -140,9 +140,9 @@ public class GameActivity extends Activity {
     // SurfaceView
     public class GameView extends SurfaceView implements
             SurfaceHolder.Callback {
-
         private int level, lives, score, coinCount, coinsCollected, fireSpeed,
                     fireCount, playerSpeed, screenWidth, screenHeight, bgColor, highScore;
+        private float offsetX, offsetY;
         private boolean potLevel;
         private String difficulty;
         private StatusBar statusBar;
@@ -152,10 +152,8 @@ public class GameActivity extends Activity {
         private FireBall[] fireBall;
         private Coin[] coin;
         private Potion potion;
-        private Context context;
         public GameView(Context context) {
             super(context);
-            this.context = context;
             getHolder().addCallback(this);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
@@ -180,7 +178,7 @@ public class GameActivity extends Activity {
             if (difficulty.equals("easy")) bgColor = Color.argb(255, 44-levelHue, 145-levelHue, 29-levelHue);
             else if (difficulty.equals("medium")) bgColor = Color.argb(255, 29-levelHue, 29-levelHue, 141-levelHue);
             else if (difficulty.equals("hard")) bgColor = Color.argb(255, 129-levelHue, 14-levelHue, 14-levelHue);
-            statusBar = new StatusBar(context, level, screenWidth, screenHeight);
+            statusBar = new StatusBar(context, level, screenWidth);
 
             // DELETE ME
             Globals.controlSize = 2;
@@ -207,7 +205,6 @@ public class GameActivity extends Activity {
 
             thread = new MainThread(getHolder(), this);
             setFocusable(true);
-
         }
 
         @Override
@@ -243,8 +240,8 @@ public class GameActivity extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            int x = (int)event.getX();
-            int y = (int)event.getY();
+            int x = -(int)offsetX+(int)event.getX();
+            int y = -(int)offsetY+(int)event.getY();
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN){
                 if (controls.pauseButton.bounds.contains(x,y) && !controls.pauseButton.pressed){
@@ -266,8 +263,8 @@ public class GameActivity extends Activity {
         }
 
         public void render(Canvas canvas) {
-            canvas.drawColor(Color.BLACK);
             canvas.drawColor(bgColor);
+            canvas.translate(offsetX, offsetY);
             player.draw(canvas);
             for (int i=0; i<fireCount; ++i)
                 fireBall[i].draw(canvas);
@@ -275,7 +272,7 @@ public class GameActivity extends Activity {
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
+            canvas.drawText(String.format("%d,%d", controls.bounds.centerX(), controls.bounds.centerY()), player.posX-5, player.posY-10, paint);
             player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
@@ -292,30 +289,33 @@ public class GameActivity extends Activity {
                     startActivity(new Intent(getContext(), PauseActivity.class));
                 }
             }
-            statusBar.update(lives, score);
             checkWin();
 
             // move player according to state of control field
             switch (controls.direction){
                 case up:
-                    if (player.posY-5 >= statusBar.height) player.posY -= playerSpeed;
+                    player.posY -= playerSpeed;
                     player.direction = Direction.up;
                     player.moving = true;
+                    offsetY += playerSpeed;
                     break;
                 case right:
-                    if (player.posX+40 <= screenWidth) player.posX += playerSpeed;
+                    player.posX += playerSpeed;
                     player.direction = Direction.right;
                     player.moving = true;
+                    offsetX -= playerSpeed;
                     break;
                 case left:
-                    if (player.posX-6 >= 0) player.posX -= playerSpeed;
+                    player.posX -= playerSpeed;
                     player.direction = Direction.left;
                     player.moving = true;
+                    offsetX += playerSpeed;
                     break;
                 case down:
-                    if (player.posY+51 <= screenHeight) player.posY += playerSpeed;
+                    player.posY += playerSpeed;
                     player.direction = Direction.down;
                     player.moving = true;
+                    offsetY -= playerSpeed;
                     break;
                 case none:
                     player.moving = false;
@@ -353,6 +353,9 @@ public class GameActivity extends Activity {
                 ++playerSpeed;
                 Globals.potionCollision = false;
             }
+
+            statusBar.update(-(int)offsetX, -(int)offsetY, lives, score);
+            controls.update(-(int)offsetX, -(int)offsetY);
         }
         private void checkWin(){
             if (!startedActivity){
@@ -387,5 +390,5 @@ public class GameActivity extends Activity {
             }
         }
 
-    } 
+    }
 }

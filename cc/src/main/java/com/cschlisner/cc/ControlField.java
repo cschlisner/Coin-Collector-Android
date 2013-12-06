@@ -17,12 +17,15 @@ public class ControlField {
     public Rect bounds, holder, center;
     public GameActivity.Direction direction = GameActivity.Direction.none;
     private Paint paint;
-    private boolean right;
-    private int posX, posY;
+    private boolean rightSide;
+    private int screenW, screenH, scnPct, dPadX, dPadY;
+    private int top, left, right, bott;
     public TextContainer pauseButton;
 
-    public ControlField(Context context, int screenW, int screenH, float screenPercent, boolean right){
-        int scnPct = Math.round(100/screenPercent);
+    public ControlField(Context context, int screenW, int screenH, float screenPercent, boolean rightSide){
+        scnPct = Math.round(100/screenPercent);
+        this.screenW = screenW;
+        this.screenH = screenH;
         paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setFakeBoldText(true);
@@ -42,20 +45,23 @@ public class ControlField {
         holder = new Rect();
         bounds = new Rect();
         center = new Rect();
-        if (right)
+        if (rightSide)
             holder.set(screenW-(screenW/scnPct), 0, screenW, screenH);
         else holder.set(0, 0, (screenW/scnPct), screenH);
-        posX = holder.left+(holder.width() - imgN.getWidth())/2;
-        posY = holder.height()/2;
-        this.right = right;
-        bounds.set(posX, posY, posX+imgN.getWidth(), posY+imgN.getHeight());
+        dPadX = holder.left+(holder.width() - imgN.getWidth())/2;
+        dPadY = holder.height()/2;
+        this.rightSide = rightSide;
+        bounds.set(dPadX, dPadY, dPadX+imgN.getWidth(), dPadY+imgN.getHeight());
         center.set(bounds.centerX()-(bounds.width()/8), bounds.centerY()-(bounds.height()/8),
                 bounds.centerX()+(bounds.width()/8), bounds.centerY()+(bounds.height()/8));
         pauseButton = new TextContainer(context, "ll", 80, holder.centerX()-20, holder.height()/4);
     }
     
     public void setDirection(int x, int y){
-        int top = bounds.top, right = bounds.right, left = bounds.left, bott = bounds.bottom;
+        top = bounds.top;
+        right = bounds.right;
+        left = bounds.left;
+        bott = bounds.bottom;
         if (center.contains(x,y))
             direction = GameActivity.Direction.none;
         else if ((bott-y) > (right-x) && (bott-y) > (x-left)){
@@ -72,25 +78,42 @@ public class ControlField {
         }
     }
 
+    public void update(int x, int y){
+        if (rightSide)
+            holder.set(x+(screenW-(screenW/scnPct)), y, x+screenW, y+screenH);
+        else holder.set(x, y, x+(screenW/scnPct), y+screenH);
+        dPadX = holder.left+(holder.width() - imgN.getWidth())/2;
+        dPadY = y+holder.height()/2;
+        bounds.set(dPadX, dPadY, dPadX+imgN.getWidth(), dPadY+imgN.getHeight());
+        center.set(bounds.centerX()-(bounds.width()/8), bounds.centerY()-(bounds.height()/8),
+                bounds.centerX()+(bounds.width()/8), bounds.centerY()+(bounds.height()/8));
+        int btnX=holder.centerX()-20, btnY=y+holder.height()/4;
+        pauseButton.bounds.set(btnX, btnY, (btnX+pauseButton.textBounds.right)+10, (btnY+pauseButton.textBounds.height())+10);
+        bounds.set(dPadX, dPadY, dPadX+imgN.getWidth(), dPadY+imgN.getHeight());
+        center.set(bounds.centerX()-(bounds.width()/8), bounds.centerY()-(bounds.height()/8),
+                bounds.centerX()+(bounds.width()/8), bounds.centerY()+(bounds.height()/8));
+    }
+
     public void draw(Canvas canvas){
+        paint.setColor(Color.BLACK);
         canvas.drawRect(holder, paint);
-        canvas.drawBitmap(glow, (right)?holder.left:holder.right, holder.top, paint);
+        canvas.drawBitmap(glow, (rightSide) ? holder.left : holder.right, holder.top, paint);
         pauseButton.draw(canvas);
         switch (direction){
             case up:
-                canvas.drawBitmap(imgU, posX, posY, paint);
+                canvas.drawBitmap(imgU, dPadX, dPadY, paint);
                 break;
             case right:
-                canvas.drawBitmap(imgR, posX, posY, paint);
+                canvas.drawBitmap(imgR, dPadX, dPadY, paint);
                 break;
             case left:
-                canvas.drawBitmap(imgL, posX, posY, paint);
+                canvas.drawBitmap(imgL, dPadX, dPadY, paint);
                 break;
             case down:
-                canvas.drawBitmap(imgD, posX, posY, paint);
+                canvas.drawBitmap(imgD, dPadX, dPadY, paint);
                 break;
             case none:
-                canvas.drawBitmap(imgN, posX, posY, paint);
+                canvas.drawBitmap(imgN, dPadX, dPadY, paint);
                 break;
         }
     }
