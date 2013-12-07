@@ -16,11 +16,18 @@ public class TextContainer {
     public Paint paint = new Paint();
     public boolean pressed;
     public Rect textBounds = new Rect();
-    private String text;
+    public String text;
     public TextContainer(Context context, String Text, int Size, int x, int y){
-        paint.setTextSize(Size);
-        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
         paint.setColor(Color.WHITE);
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
+        reset(Text, Size, x, y);
+    }
+
+    public void reset(String Text, int Size, int x, int y){
+        pressed = false;
+        paint.setTextSize(Size);
+        paint.setColor(Color.WHITE);
+        paint.setAlpha(255);
         text = Text;
         paint.getTextBounds(text, 0, text.length(), textBounds);
         bounds.set(x-10, y-10, (x+textBounds.right)+10, (y+textBounds.height())+10);

@@ -10,5 +10,6 @@
     <string name="title_activity_game">GameActivity</string>
     <string name="title_activity_pause">PauseActivity</string>
     <string name="title_activity_game_over">GameOverActivity</string>
+    <string name="title_activity_options">OptionsActivity</string>
 
 </resources>

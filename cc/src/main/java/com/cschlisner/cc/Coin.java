@@ -15,26 +15,29 @@ import java.util.Random;
 public class Coin {
     private Bitmap[] images = new Bitmap[8];
     private Paint paint = new Paint();
-    private int posX, posY, animate, switchImage;
+    private int posX, posY, animate, switchImage, imgW, imgH;
     public boolean collected, drawMe;
     private RectF bounds = new RectF();
     public Coin(Context context, int sw, int sh){
-        images[0] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c1);
-        images[1] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c2);
-        images[2] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c3);
-        images[3] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c4);
-        images[4] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c5);
+        images[0] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c1);
+        images[1] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c2);
+        images[2] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c3);
+        images[3] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c4);
+        images[4] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c5);
         images[5] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c6);
         images[6] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c7);
-        images[7] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c8);
+        images[7] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c8);
+
+        imgW = images[0].getWidth();
+        imgH = images[0].getHeight();
         generate(sw, sh);
     }
 
     private void generate(int scrW, int scrH){
         Random rand = new Random();
-        posX = rand.nextInt(scrW-images[0].getWidth());
-        posY = rand.nextInt(scrH-images[0].getHeight());
-        bounds.set(posX, posY, posX + images[0].getWidth(), posY + images[0].getHeight());
+        posX = rand.nextInt(scrW-imgW);
+        posY = rand.nextInt(scrH-imgH);
+        bounds.set(posX, posY, posX + imgW, posY + imgH);
         switchImage = rand.nextInt(6);
     }
 

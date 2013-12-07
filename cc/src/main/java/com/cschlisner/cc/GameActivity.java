@@ -11,10 +11,15 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -25,7 +30,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-public class GameActivity extends Activity {
+public class GameActivity extends Activity{
     public static Context gamectx;
     private boolean inPause, startedActivity;
     public enum Direction {up, down, left, right, none}
@@ -39,7 +44,6 @@ public class GameActivity extends Activity {
         gamectx = GameActivity.this;
         GameView gameView = new GameView(this);
         setContentView(gameView);
-
     }
     @Override
     public void onBackPressed() {
@@ -146,7 +150,8 @@ public class GameActivity extends Activity {
             SurfaceHolder.Callback {
         private int level, lives, score, coinCount, coinsCollected, fireSpeed, tilesX, tilesY,
                     fireCount, playerSpeed, screenWidth, screenHeight, bgA, highScore;
-        private float offsetX, offsetY;
+        private float offsetX, offsetY, viewOffSetX, ViewOffSetY;
+        private float[] controlSize = new float[]{12.5f,16.67f,25.0f};
         private RectF mapRect, viewRect, testRect = new RectF();
         private boolean potLevel, bgADir;
         private String difficulty;
@@ -158,6 +163,8 @@ public class GameActivity extends Activity {
         private Coin[] coin;
         private Potion potion;
         private Bitmap bgTile, altBgTile;
+        public int cntrlSize = Globals.controlSize;
+        public boolean cntrlRight = Globals.controlsRight;
         public GameView(Context context) {
             super(context);
             getHolder().addCallback(this);
@@ -181,17 +188,9 @@ public class GameActivity extends Activity {
             fireCount = intent.getIntExtra("FIRECOUNT", 0);
             playerSpeed = intent.getIntExtra("PLAYERSPEED", 0);
             if (level%2==0) potLevel = true;
+            statusBar = new StatusBar(context, level, screenWidth);
+            controls = new ControlField(context, screenWidth, screenHeight, controlSize[cntrlSize], cntrlRight);
 
-            // DELETE ME
-            Globals.controlSize = 2;
-            Globals.controlsRight = true;
-            // DELETE ME
-            float cSize = 0;
-            if (Globals.controlSize == 1) cSize = 12.5f;
-            else if (Globals.controlSize == 2) cSize = 16.67f;
-            else if (Globals.controlSize == 3) cSize = 25f;
-            controls = new ControlField(context, screenWidth, screenHeight, cSize, Globals.controlsRight);
-            screenWidth -= controls.holder.width();
 
             if (difficulty.equals("easy")){
                 bgTile = BitmapFactory.decodeResource(getResources(), R.drawable.grass);
@@ -206,10 +205,9 @@ public class GameActivity extends Activity {
                 altBgTile = BitmapFactory.decodeResource(getResources(), R.drawable.molten2);
                 mapRect.set(0, 0, 3000, 3000);
             }
-            statusBar = new StatusBar(context, level, screenWidth);
-
-            mapRect.set(0, 0, 2000, 2000);
-            viewRect.set(offsetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            if (cntrlRight) screenWidth -= controls.holder.width();
+            else viewOffSetX = controls.holder.width();
+            viewRect.set(offsetX+viewOffSetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
             tilesX = ((int)mapRect.width()/bgTile.getWidth())+1;
             tilesY = ((int)mapRect.height()/bgTile.getHeight())+1;
             player = new Player(context);
@@ -226,6 +224,7 @@ public class GameActivity extends Activity {
             potion = new Potion(context, (int)mapRect.width(), (int)mapRect.height());
             thread = new MainThread(getHolder(), this);
             setFocusable(true);
+
         }
 
         @Override
@@ -243,6 +242,12 @@ public class GameActivity extends Activity {
                 thread.setRunning(true);
                 thread.start();
             }
+            if (cntrlSize != Globals.controlSize || cntrlRight != Globals.controlsRight){
+                controls = new ControlField(getContext(), screenWidth, screenHeight, controlSize[Globals.controlSize], Globals.controlsRight);
+                cntrlSize = Globals.controlSize;
+                cntrlRight = Globals.controlsRight;
+            }
+            viewOffSetX = (Globals.controlsRight)?0:controls.holder.width();
         }
 
         @Override
@@ -286,10 +291,10 @@ public class GameActivity extends Activity {
         public void render(Canvas canvas) {
             canvas.drawColor(Color.BLACK);
             canvas.translate(-offsetX, -offsetY);
-            viewRect.set(offsetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            viewRect.set(offsetX+viewOffSetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
             if (bgA <= 0 || bgA >= 255) bgADir = !bgADir;
-            if (bgADir) ++bgA;
-            else --bgA;
+            if (bgADir) bgA+=2;
+            else bgA-=2;
             for (int y = 0; y<tilesY; ++y)
                 for (int x = 0; x < tilesX; ++x){
                     paint.setAlpha(255);
@@ -340,7 +345,7 @@ public class GameActivity extends Activity {
                     player.moving = true;
                     break;
                 case left:
-                    if (player.posX-6 >= offsetX) player.posX -= playerSpeed;
+                    if (player.posX-6 >= offsetX+viewOffSetX) player.posX -= playerSpeed;
                     else ++cameraSpeed;
                     player.direction = Direction.left;
                     player.moving = true;
@@ -363,7 +368,7 @@ public class GameActivity extends Activity {
                 cameraSpeed = playerSpeed - 2;
             distX = (Math.abs(deltaX) < 10)?0:(deltaX > 0)?cameraSpeed:-cameraSpeed;
             distY = (Math.abs(deltaY) < 10)?0:(deltaY > 0)?cameraSpeed:-cameraSpeed;
-            viewRect.set(offsetX-distX, offsetY-distY, (offsetX-distX)+screenWidth, (offsetY-distY)+screenHeight);
+            viewRect.set(offsetX-distX+viewOffSetX, offsetY-distY, (offsetX-distX)+screenWidth, (offsetY-distY)+screenHeight);
             if (viewRect.right < mapRect.right && viewRect.left > mapRect.left)
                 offsetX -= distX;
             if (viewRect.top > mapRect.top && viewRect.bottom < mapRect.bottom)
@@ -377,19 +382,23 @@ public class GameActivity extends Activity {
                 coin[i].update(player.playerRect, viewRect);
             if (potLevel)
                 potion.update(player.playerRect);
-            if (Globals.fireCollision && !player.invincible){
-                player.msg = "%#&@!";
+            if (Globals.fireCollision){
                 Globals.fireCollision = false;
-                --lives;
-                if (lives == 0) checkWin();
-                for (int i=0; i<fireCount; ++i){
-                    fireBall[i].generate();
-                    try {Thread.sleep(500/fireCount);}
-                    catch (InterruptedException e) { }
+                if (!player.invincible){
+                    player.msg = "%#&@!";
+                    --lives;
+                    if (lives == 0) checkWin();
+                    for (int i=0; i<fireCount; ++i){
+                        fireBall[i].generate();
+                        try {Thread.sleep(500/fireCount);}
+                        catch (InterruptedException e) { }
+                        player.blinks = 0;
+                        player.invincible = (player.blinks < 6);
+                    }
+                    player.posX = viewRect.centerX();
+                    player.posY = viewRect.centerY();
+                    player.invincible = (player.blinks < 6);
                 }
-                player.posX = viewRect.centerX();
-                player.posY = viewRect.centerY();
-                player.invincible = (player.blinks < 6);
             }
             if (Globals.coinCollisions > 0){
                 player.msg = "+100";

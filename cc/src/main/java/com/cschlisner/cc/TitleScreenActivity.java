@@ -20,7 +20,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class TitleScreenActivity extends ActionBarActivity {
-    private TextContainer easyButton, mediumButton, hardButton;
+    private TextContainer easyButton, mediumButton, hardButton, optionsButton;
     private boolean startedNewActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,8 @@ public class TitleScreenActivity extends ActionBarActivity {
             mediumButton = new TextContainer(context, "medium mode", 60, (screenWidth/2), screenHeight/2);
             hardButton = new TextContainer(context, "hard mode", 60, (screenWidth/2)+(screenWidth/20),
                     (screenHeight/2)+(screenHeight/6));
-
+            optionsButton = new TextContainer(context, "options", 60, (screenWidth/2)+(screenWidth/10),
+                    (screenHeight/2)+(screenHeight/3));
             scorePaint.setTextSize(50);
             scorePaint.setColor(Color.GRAY);
             titlePaint.setTextSize(120);
@@ -58,6 +59,8 @@ public class TitleScreenActivity extends ActionBarActivity {
             easyScore = prefs.getInt("easy", 0);
             medScore = prefs.getInt("medium", 0);
             hardScore = prefs.getInt("hard", 0);
+            Globals.controlSize = prefs.getInt("cntrlSize", 1);
+            Globals.controlsRight = prefs.getBoolean("cntrlSide", true);
             Globals.hse = easyScore;
             Globals.hsm = medScore;
             Globals.hsh = hardScore;
@@ -80,9 +83,10 @@ public class TitleScreenActivity extends ActionBarActivity {
             hardButton.draw(canvas);
             canvas.drawText(String.format("%d", hardScore), ((screenWidth/2)+(screenWidth/20))+hardButton.bounds.width(),
                     (screenHeight/2)+(screenHeight/6)+hardButton.textBounds.height(), scorePaint);
+            optionsButton.draw(canvas);
             canvas.drawText(title, titleX, 120, titlePaint);
             canvas.drawBitmap(logo, matrix, null);
-            if (easyButton.pressed || mediumButton.pressed || hardButton.pressed){
+            if (easyButton.pressed || mediumButton.pressed || hardButton.pressed || optionsButton.pressed){
                 scorePaint.setAlpha(0);
                 update();
                 matrix.postRotate(12, lx+((logo.getWidth()*lscale)/2), ly+((logo.getHeight()*lscale)/2));
@@ -100,18 +104,28 @@ public class TitleScreenActivity extends ActionBarActivity {
 
             if (easyButton.bounds.contains((int)x, (int)y)){
                 easyButton.pressed = true;
+                optionsButton.paint.setAlpha(0);
                 mediumButton.paint.setAlpha(0);
                 hardButton.paint.setAlpha(0);
                 postInvalidate();
             }
             else if (mediumButton.bounds.contains((int)x, (int)y)){
                 mediumButton.pressed = true;
+                optionsButton.paint.setAlpha(0);
                 easyButton.paint.setAlpha(0);
                 hardButton.paint.setAlpha(0);
                 postInvalidate();
             }
             else if (hardButton.bounds.contains((int)x, (int)y)){
                 hardButton.pressed = true;
+                optionsButton.paint.setAlpha(0);
+                mediumButton.paint.setAlpha(0);
+                easyButton.paint.setAlpha(0);
+                postInvalidate();
+            }
+            else if (optionsButton.bounds.contains((int)x, (int)y)){
+                optionsButton.pressed = true;
+                hardButton.paint.setAlpha(0);
                 mediumButton.paint.setAlpha(0);
                 easyButton.paint.setAlpha(0);
                 postInvalidate();
@@ -164,6 +178,19 @@ public class TitleScreenActivity extends ActionBarActivity {
                     i.putExtra("LEVEL", 1);
                     context.startActivity(i);
                     finish();
+                }
+            }
+            else if (optionsButton.pressed){
+                if (optionsButton.bounds.left <= screenWidth || titleX >= 0-titlePaint.measureText(title)){
+                    optionsButton.bounds.left += 30;
+                    titleX -= 30;
+                }
+                else if (!startedNewActivity) {
+                    startedNewActivity = true;
+                    Context context = getContext();
+                    Intent i = new Intent(context, OptionsActivity.class);
+                    i.putExtra("CALLER", "TitleScreenActivity");
+                    context.startActivity(i);
                 }
             }
         }

@@ -43,6 +43,11 @@
             android:label="@string/title_activity_game_over"
             android:screenOrientation="landscape" >
         </activity>
+        <activity
+            android:name="com.cschlisner.cc.OptionsActivity"
+            android:label="@string/title_activity_options"
+            android:screenOrientation="landscape" >
+        </activity>
     </application>
 
 </manifest>

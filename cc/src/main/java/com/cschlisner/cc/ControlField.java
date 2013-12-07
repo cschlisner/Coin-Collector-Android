@@ -97,7 +97,9 @@ public class ControlField {
 
     public void draw(Canvas canvas){
         paint.setColor(Color.BLACK);
+        paint.setAlpha(200);
         canvas.drawRect(holder, paint);
+        paint.setAlpha(255);
         canvas.drawBitmap(glow, (rightSide) ? holder.left : holder.right, holder.top, paint);
         pauseButton.draw(canvas);
         switch (direction){
