@@ -149,10 +149,10 @@ public class GameActivity extends Activity{
     public class GameView extends SurfaceView implements
             SurfaceHolder.Callback {
         private int level, lives, score, coinCount, coinsCollected, fireSpeed, tilesX, tilesY,
-                    fireCount, playerSpeed, screenWidth, screenHeight, bgA, highScore;
-        private float offsetX, offsetY, viewOffSetX, ViewOffSetY;
+                    fireCount, playerSpeed, screenWidth, orgSW, screenHeight, bgA, highScore;
+        private float offsetX, offsetY, leftCntrlOffset;
         private float[] controlSize = new float[]{12.5f,16.67f,25.0f};
-        private RectF mapRect, viewRect, testRect = new RectF();
+        private RectF mapRect, viewRect;
         private boolean potLevel, bgADir;
         private String difficulty;
         private StatusBar statusBar;
@@ -170,6 +170,7 @@ public class GameActivity extends Activity{
             getHolder().addCallback(this);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
+            orgSW = metrics.widthPixels;
             screenHeight = metrics.heightPixels;
             mapRect = new RectF();
             viewRect = new RectF();
@@ -206,8 +207,8 @@ public class GameActivity extends Activity{
                 mapRect.set(0, 0, 3000, 3000);
             }
             if (cntrlRight) screenWidth -= controls.holder.width();
-            else viewOffSetX = controls.holder.width();
-            viewRect.set(offsetX+viewOffSetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            else leftCntrlOffset = controls.holder.width();
+            viewRect.set(offsetX+leftCntrlOffset, offsetY, offsetX+screenWidth, offsetY+screenHeight);
             tilesX = ((int)mapRect.width()/bgTile.getWidth())+1;
             tilesY = ((int)mapRect.height()/bgTile.getHeight())+1;
             player = new Player(context);
@@ -243,11 +244,15 @@ public class GameActivity extends Activity{
                 thread.start();
             }
             if (cntrlSize != Globals.controlSize || cntrlRight != Globals.controlsRight){
+                leftCntrlOffset = 0;
+                screenWidth = orgSW;
                 controls = new ControlField(getContext(), screenWidth, screenHeight, controlSize[Globals.controlSize], Globals.controlsRight);
+                if (Globals.controlsRight) screenWidth -= controls.holder.width();
+                else leftCntrlOffset = controls.holder.width();
+                viewRect.set(offsetX+leftCntrlOffset, offsetY, offsetX+screenWidth, offsetY+screenHeight);
                 cntrlSize = Globals.controlSize;
                 cntrlRight = Globals.controlsRight;
             }
-            viewOffSetX = (Globals.controlsRight)?0:controls.holder.width();
         }
 
         @Override
@@ -291,7 +296,7 @@ public class GameActivity extends Activity{
         public void render(Canvas canvas) {
             canvas.drawColor(Color.BLACK);
             canvas.translate(-offsetX, -offsetY);
-            viewRect.set(offsetX+viewOffSetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            viewRect.set(offsetX+leftCntrlOffset, offsetY, offsetX+screenWidth, offsetY+screenHeight);
             if (bgA <= 0 || bgA >= 255) bgADir = !bgADir;
             if (bgADir) bgA+=2;
             else bgA-=2;
@@ -345,7 +350,7 @@ public class GameActivity extends Activity{
                     player.moving = true;
                     break;
                 case left:
-                    if (player.posX-6 >= offsetX+viewOffSetX) player.posX -= playerSpeed;
+                    if (player.posX-6 >= offsetX+leftCntrlOffset) player.posX -= playerSpeed;
                     else ++cameraSpeed;
                     player.direction = Direction.left;
                     player.moving = true;
@@ -368,7 +373,7 @@ public class GameActivity extends Activity{
                 cameraSpeed = playerSpeed - 2;
             distX = (Math.abs(deltaX) < 10)?0:(deltaX > 0)?cameraSpeed:-cameraSpeed;
             distY = (Math.abs(deltaY) < 10)?0:(deltaY > 0)?cameraSpeed:-cameraSpeed;
-            viewRect.set(offsetX-distX+viewOffSetX, offsetY-distY, (offsetX-distX)+screenWidth, (offsetY-distY)+screenHeight);
+            viewRect.set((offsetX-distX)+leftCntrlOffset, offsetY-distY, (offsetX-distX)+screenWidth, (offsetY-distY)+screenHeight);
             if (viewRect.right < mapRect.right && viewRect.left > mapRect.left)
                 offsetX -= distX;
             if (viewRect.top > mapRect.top && viewRect.bottom < mapRect.bottom)

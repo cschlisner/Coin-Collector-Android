@@ -48,6 +48,7 @@ public class OptionsActivity extends Activity {
             paint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             paint.setTextSize(120);
             paint.setColor(Color.WHITE);
+            aboutButton.paint.setAlpha(130);
         }
 
         @Override
@@ -129,9 +130,12 @@ public class OptionsActivity extends Activity {
         if (lastActivity.equals("TitleScreenActivity")){
             Intent i = new Intent(this, TitleScreenActivity.class);
             startActivity(i);
+            finish();
         }
-        else super.onBackPressed();
-        finish();
+        else {
+        super.onBackPressed();
+            finish();
+        }
     }
 
     @Override

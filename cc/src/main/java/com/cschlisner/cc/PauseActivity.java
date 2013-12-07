@@ -14,7 +14,9 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class PauseActivity extends Activity {
-
+    private TextContainer resumeButton, menuButton, optionsButton;
+    private int titleX, screenWidth, screenHeight;
+    private boolean startNewActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,9 +29,6 @@ public class PauseActivity extends Activity {
     public class PauseView extends View {
         private Paint paint = new Paint();
         private String title = "Paused";
-        private TextContainer resumeButton, menuButton, optionsButton;
-        private int titleX, screenWidth, screenHeight;
-        private boolean startNewActivity;
         public PauseView(Context context){
             super(context);
             titleX = 20;
@@ -118,12 +117,6 @@ public class PauseActivity extends Activity {
                 }
                 else if (!startNewActivity){
                     startNewActivity = true;
-                    optionsButton.reset("options", 60, (screenWidth/2)+(screenWidth/20),
-                            (screenHeight/2)+(screenHeight/6));
-                    menuButton.reset("main menu", 60, (screenWidth/2), screenHeight/2);
-                    resumeButton.reset("resume", 60, (screenWidth/2)-(screenWidth/20),
-                            (screenHeight/2)-(screenHeight/6));
-                    titleX = 20;
                     Intent i = new Intent(getContext(), OptionsActivity.class);
                     i.putExtra("CALLER", "PauseActivity");
                     startActivity(i);
@@ -135,5 +128,17 @@ public class PauseActivity extends Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        startNewActivity = false;
+        optionsButton.reset("options", 60, (screenWidth/2)+(screenWidth/20),
+                (screenHeight/2)+(screenHeight/6));
+        menuButton.reset("main menu", 60, (screenWidth/2), screenHeight/2);
+        resumeButton.reset("resume", 60, (screenWidth/2)-(screenWidth/20),
+                (screenHeight/2)-(screenHeight/6));
+        titleX = 20;
+        super.onResume();
     }
 }
