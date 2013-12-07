@@ -87,8 +87,9 @@ public class ControlField {
         bounds.set(dPadX, dPadY, dPadX+imgN.getWidth(), dPadY+imgN.getHeight());
         center.set(bounds.centerX()-(bounds.width()/8), bounds.centerY()-(bounds.height()/8),
                 bounds.centerX()+(bounds.width()/8), bounds.centerY()+(bounds.height()/8));
-        int btnX=holder.centerX()-20, btnY=y+holder.height()/4;
+        int btnX=holder.centerX()-23, btnY=y+holder.height()/4;
         pauseButton.bounds.set(btnX, btnY, (btnX+pauseButton.textBounds.right)+10, (btnY+pauseButton.textBounds.height())+10);
+        pauseButton.touchRect.set(holder.left, y+40, holder.right, bounds.top-100);
         bounds.set(dPadX, dPadY, dPadX+imgN.getWidth(), dPadY+imgN.getHeight());
         center.set(bounds.centerX()-(bounds.width()/8), bounds.centerY()-(bounds.height()/8),
                 bounds.centerX()+(bounds.width()/8), bounds.centerY()+(bounds.height()/8));

@@ -19,7 +19,6 @@ public class NextLevelActivity extends Activity {
     private String mode;
     private int level, timer = 3, updates, lives, coins, score, fireSpeed,
             fireCount, playerSpeed, playerSpeedGained, screenWidth, screenHeight, highscore;
-    private boolean runTimer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +27,6 @@ public class NextLevelActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         NextLevelView nextLevelView = new NextLevelView(this);
         setContentView(nextLevelView);
-        runTimer = false;
     }
 
     public class NextLevelView extends View {
@@ -53,25 +51,25 @@ public class NextLevelActivity extends Activity {
             score = intent.getIntExtra("SCORE", 0);
             if (mode.equals("easy")){
                 lives = 4 + (level/3);
-                coins = 10 + level;
+                coins = 10 + 2*level;
                 fireSpeed = 8;
-                fireCount = 9 + level;
+                fireCount = 30 + level*3;
                 playerSpeed = 7 + playerSpeedGained;
                 highscore = Globals.hse;
             }
             else if (mode.equals("medium")){
                 lives = 5+ (level/3);
-                coins = 11 + level;
+                coins = 15 + 2*level;
                 fireSpeed = 9;
-                fireCount = 10 + level;
+                fireCount = 35 + level*3;
                 playerSpeed = 7 + playerSpeedGained;
                 highscore = Globals.hsm;
             }
             else if (mode.equals("hard")){
                 lives = 6 + (level/3);
-                coins = 12 + level;
+                coins = 20 + 2*level;
                 fireSpeed = 10;
-                fireCount = 11 + level;
+                fireCount = 40 + level*3;
                 playerSpeed = 7 + playerSpeedGained;
                 highscore = Globals.hsh;
             }

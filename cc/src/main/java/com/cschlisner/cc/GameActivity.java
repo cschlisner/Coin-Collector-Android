@@ -3,9 +3,13 @@ package com.cschlisner.cc;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
@@ -66,7 +70,7 @@ public class GameActivity extends Activity {
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
-        return false;
+        return true;
     }
 
     // Thread
@@ -140,10 +144,11 @@ public class GameActivity extends Activity {
     // SurfaceView
     public class GameView extends SurfaceView implements
             SurfaceHolder.Callback {
-        private int level, lives, score, coinCount, coinsCollected, fireSpeed,
-                    fireCount, playerSpeed, screenWidth, screenHeight, bgColor, highScore;
+        private int level, lives, score, coinCount, coinsCollected, fireSpeed, tilesX, tilesY,
+                    fireCount, playerSpeed, screenWidth, screenHeight, bgA, highScore;
         private float offsetX, offsetY;
-        private boolean potLevel;
+        private RectF mapRect, viewRect, testRect = new RectF();
+        private boolean potLevel, bgADir;
         private String difficulty;
         private StatusBar statusBar;
         private ControlField controls;
@@ -152,13 +157,15 @@ public class GameActivity extends Activity {
         private FireBall[] fireBall;
         private Coin[] coin;
         private Potion potion;
+        private Bitmap bgTile, altBgTile;
         public GameView(Context context) {
             super(context);
             getHolder().addCallback(this);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
             screenHeight = metrics.heightPixels;
-
+            mapRect = new RectF();
+            viewRect = new RectF();
             paint = new Paint();
             paint.setColor(Color.WHITE);
             paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
@@ -174,35 +181,49 @@ public class GameActivity extends Activity {
             fireCount = intent.getIntExtra("FIRECOUNT", 0);
             playerSpeed = intent.getIntExtra("PLAYERSPEED", 0);
             if (level%2==0) potLevel = true;
-            int levelHue = level;
-            if (difficulty.equals("easy")) bgColor = Color.argb(255, 44-levelHue, 145-levelHue, 29-levelHue);
-            else if (difficulty.equals("medium")) bgColor = Color.argb(255, 29-levelHue, 29-levelHue, 141-levelHue);
-            else if (difficulty.equals("hard")) bgColor = Color.argb(255, 129-levelHue, 14-levelHue, 14-levelHue);
-            statusBar = new StatusBar(context, level, screenWidth);
 
             // DELETE ME
             Globals.controlSize = 2;
+            Globals.controlsRight = true;
             // DELETE ME
-
             float cSize = 0;
             if (Globals.controlSize == 1) cSize = 12.5f;
             else if (Globals.controlSize == 2) cSize = 16.67f;
             else if (Globals.controlSize == 3) cSize = 25f;
-            controls = new ControlField(context, screenWidth, screenHeight, cSize, true);
+            controls = new ControlField(context, screenWidth, screenHeight, cSize, Globals.controlsRight);
             screenWidth -= controls.holder.width();
+
+            if (difficulty.equals("easy")){
+                bgTile = BitmapFactory.decodeResource(getResources(), R.drawable.grass);
+                mapRect.set(0, 0, 2000, 2000);
+            }
+            else if (difficulty.equals("medium")){
+                bgTile = BitmapFactory.decodeResource(getResources(), R.drawable.stone);
+                mapRect.set(0, 0, 2500, 2500);
+            }
+            else if (difficulty.equals("hard")){
+                bgTile = BitmapFactory.decodeResource(getResources(), R.drawable.molten1);
+                altBgTile = BitmapFactory.decodeResource(getResources(), R.drawable.molten2);
+                mapRect.set(0, 0, 3000, 3000);
+            }
+            statusBar = new StatusBar(context, level, screenWidth);
+
+            mapRect.set(0, 0, 2000, 2000);
+            viewRect.set(offsetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            tilesX = ((int)mapRect.width()/bgTile.getWidth())+1;
+            tilesY = ((int)mapRect.height()/bgTile.getHeight())+1;
             player = new Player(context);
-            player.posX = screenWidth/2;
+            player.posX = offsetX+viewRect.width()/2;
             player.posY = screenHeight/2+statusBar.height;
             fireBall = new FireBall[fireCount];
             coin = new Coin[coinCount];
             for (int i=0; i<fireCount; ++i){
-                fireBall[i] = new FireBall(context, fireSpeed, screenWidth, screenHeight, statusBar.height);
+                fireBall[i] = new FireBall(context, fireSpeed, (int)mapRect.width(), (int)mapRect.height());
             }
             for (int i=0; i<coinCount; ++i){
-                coin[i] = new Coin(context, screenWidth, screenHeight, statusBar.height);
+                coin[i] = new Coin(context, (int)mapRect.width(), (int)mapRect.height());
             }
-            potion = new Potion(context, screenHeight, screenWidth, statusBar.height);
-
+            potion = new Potion(context, (int)mapRect.width(), (int)mapRect.height());
             thread = new MainThread(getHolder(), this);
             setFocusable(true);
         }
@@ -240,11 +261,11 @@ public class GameActivity extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            int x = -(int)offsetX+(int)event.getX();
-            int y = -(int)offsetY+(int)event.getY();
+            int x = (int)offsetX+(int)event.getX();
+            int y = (int)offsetY+(int)event.getY();
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN){
-                if (controls.pauseButton.bounds.contains(x,y) && !controls.pauseButton.pressed){
+                if (controls.pauseButton.touchRect.contains(x,y) && !controls.pauseButton.pressed){
                     controls.pauseButton.pressed = true;
                 }
                 if (controls.holder.contains(x,y)){
@@ -263,8 +284,20 @@ public class GameActivity extends Activity {
         }
 
         public void render(Canvas canvas) {
-            canvas.drawColor(bgColor);
-            canvas.translate(offsetX, offsetY);
+            canvas.drawColor(Color.BLACK);
+            canvas.translate(-offsetX, -offsetY);
+            viewRect.set(offsetX, offsetY, offsetX+screenWidth, offsetY+screenHeight);
+            if (bgA <= 0 || bgA >= 255) bgADir = !bgADir;
+            if (bgADir) ++bgA;
+            else --bgA;
+            for (int y = 0; y<tilesY; ++y)
+                for (int x = 0; x < tilesX; ++x){
+                    paint.setAlpha(255);
+                    canvas.drawBitmap(bgTile, x*bgTile.getWidth(), y*bgTile.getHeight(), paint);
+                    paint.setAlpha(bgA);
+                    if (altBgTile!=null) canvas.drawBitmap(altBgTile, x*bgTile.getWidth(), y*bgTile.getHeight(), paint);
+                }
+            paint.setAlpha(255);
             player.draw(canvas);
             for (int i=0; i<fireCount; ++i)
                 fireBall[i].draw(canvas);
@@ -272,7 +305,8 @@ public class GameActivity extends Activity {
                 coin[i].draw(canvas);
             if (potLevel)
                 potion.draw(canvas);
-            canvas.drawText(String.format("%d,%d", controls.bounds.centerX(), controls.bounds.centerY()), player.posX-5, player.posY-10, paint);
+            paint.setColor(Color.WHITE);
+            canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
             player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
@@ -290,47 +324,61 @@ public class GameActivity extends Activity {
                 }
             }
             checkWin();
-
+            int cameraSpeed = playerSpeed - 3;
             // move player according to state of control field
             switch (controls.direction){
                 case up:
-                    player.posY -= playerSpeed;
+                    if (player.posY-5 >= statusBar.height+offsetY) player.posY -= playerSpeed;
+                    else ++cameraSpeed;
                     player.direction = Direction.up;
                     player.moving = true;
-                    offsetY += playerSpeed;
                     break;
                 case right:
-                    player.posX += playerSpeed;
+                    if (player.posX+40 <= offsetX+screenWidth) player.posX += playerSpeed;
+                    else ++cameraSpeed;
                     player.direction = Direction.right;
                     player.moving = true;
-                    offsetX -= playerSpeed;
                     break;
                 case left:
-                    player.posX -= playerSpeed;
+                    if (player.posX-6 >= offsetX) player.posX -= playerSpeed;
+                    else ++cameraSpeed;
                     player.direction = Direction.left;
                     player.moving = true;
-                    offsetX += playerSpeed;
                     break;
                 case down:
-                    player.posY += playerSpeed;
+                    if (player.posY+51 <= offsetY+screenHeight) player.posY += playerSpeed;
+                    else ++cameraSpeed;
                     player.direction = Direction.down;
                     player.moving = true;
-                    offsetY -= playerSpeed;
                     break;
                 case none:
                     player.moving = false;
                     break;
             }
+            // camera movement
+            int deltaX, deltaY, distX, distY;
+            deltaY = ((int)viewRect.centerY() - (int)player.playerRect.centerY());
+            deltaX = ((int)viewRect.centerX() - (int)player.playerRect.centerX());
+            if (deltaX < 200 && deltaY < 200)
+                cameraSpeed = playerSpeed - 2;
+            distX = (Math.abs(deltaX) < 10)?0:(deltaX > 0)?cameraSpeed:-cameraSpeed;
+            distY = (Math.abs(deltaY) < 10)?0:(deltaY > 0)?cameraSpeed:-cameraSpeed;
+            viewRect.set(offsetX-distX, offsetY-distY, (offsetX-distX)+screenWidth, (offsetY-distY)+screenHeight);
+            if (viewRect.right < mapRect.right && viewRect.left > mapRect.left)
+                offsetX -= distX;
+            if (viewRect.top > mapRect.top && viewRect.bottom < mapRect.bottom)
+                offsetY -= distY;
+
 
             // Handle Collison Events
             for (int i=0; i<fireCount; ++i)
-                fireBall[i].update(player.playerRect);
+                fireBall[i].update(player.playerRect, viewRect);
             for (int i=0; i<coinCount; ++i)
-                coin[i].update(player.playerRect);
+                coin[i].update(player.playerRect, viewRect);
             if (potLevel)
                 potion.update(player.playerRect);
             if (Globals.fireCollision && !player.invincible){
-                player.msg = "!";
+                player.msg = "%#&@!";
                 Globals.fireCollision = false;
                 --lives;
                 if (lives == 0) checkWin();
@@ -339,10 +387,12 @@ public class GameActivity extends Activity {
                     try {Thread.sleep(500/fireCount);}
                     catch (InterruptedException e) { }
                 }
-                player.posX = screenWidth/2;
-                player.posY = screenHeight/2+statusBar.height;
+                player.posX = viewRect.centerX();
+                player.posY = viewRect.centerY();
+                player.invincible = (player.blinks < 6);
             }
             if (Globals.coinCollisions > 0){
+                player.msg = "+100";
                 score += 100*Globals.coinCollisions;
                 coinsCollected += Globals.coinCollisions;
                 checkWin();
@@ -354,8 +404,8 @@ public class GameActivity extends Activity {
                 Globals.potionCollision = false;
             }
 
-            statusBar.update(-(int)offsetX, -(int)offsetY, lives, score);
-            controls.update(-(int)offsetX, -(int)offsetY);
+            statusBar.update((int)offsetX, (int)offsetY, lives, score);
+            controls.update((int)offsetX, (int)offsetY);
         }
         private void checkWin(){
             if (!startedActivity){

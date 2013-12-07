@@ -12,7 +12,7 @@ import android.graphics.Typeface;
  * Created by cole on 11/27/13.
  */
 public class TextContainer {
-    public Rect bounds = new Rect();
+    public Rect bounds = new Rect(), touchRect = new Rect();
     public Paint paint = new Paint();
     public boolean pressed;
     public Rect textBounds = new Rect();

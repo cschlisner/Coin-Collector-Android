@@ -17,21 +17,19 @@ import java.util.Random;
 public class FireBall{
     private Bitmap image1, image2;
     private int velocityX, velocityY, maxSpeed, screenWidth, screenHeight,
-                imageWidth, imageHeight, offset, animate;
+                imageWidth, imageHeight, animate;
     private float posX, posY;
-    private boolean switchImage;
+    private boolean switchImage, drawMe;
     private RectF bounds = new RectF();
     private Matrix matrix = new Matrix();
     Paint paint = new Paint();
-
-    public FireBall(Context context, int speed, int sw, int sh, int sBarOffset){
+    public FireBall(Context context, int speed, int sw, int sh){
         image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire1);
         image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire2);
         paint.setColor(Color.WHITE);
         maxSpeed = speed;
         screenWidth = sw;
         screenHeight = sh;
-        offset = sBarOffset;
         imageWidth = image1.getWidth();
         imageHeight = image1.getHeight();
         generate();
@@ -48,7 +46,7 @@ public class FireBall{
             velocityX = randS;
             velocityY = remainderP;
             posX = rand.nextInt(screenWidth-imageWidth);
-            posY = offset;
+            posY = 0;
         }
         else if (screenEdge == 1){
             velocityY = randS;
@@ -71,28 +69,30 @@ public class FireBall{
 
     }
 
-    public void update(RectF playerRect){
+    public void update(RectF playerRect, RectF view){
         bounds.set(posX, posY, posX+imageWidth-5, posY+imageHeight+3);
-        if (bounds.intersect(playerRect)){
-            Globals.fireCollision = true;}
+        drawMe = (bounds.intersect(view));
+        if (drawMe)
+            if (bounds.intersect(playerRect)) Globals.fireCollision = true;
         if (posX < screenWidth && posX >= 0){ posX += velocityX;}
         else generate();
-        if (posY < screenHeight && posY >= offset){posY += velocityY;}
+        if (posY < screenHeight && posY >= 0){posY += velocityY;}
         else generate();
         matrix.reset();
         float offsetX = posX+imageWidth, offsetY = posY+imageWidth;
-
-            matrix.setTranslate((velocityX > 0) ? offsetX : posX , (velocityY < 0) ? offsetY : posY);
-            matrix.preScale((velocityX > 0) ? -1.0f : 1.0f, (velocityY < 0) ? -1.0f : 1.0f); //flip vertically
+        matrix.setTranslate((velocityX > 0) ? offsetX : posX , (velocityY < 0) ? offsetY : posY);
+        matrix.preScale((velocityX > 0) ? -1.0f : 1.0f, (velocityY < 0) ? -1.0f : 1.0f); //flip vertically
     }
 
     public void draw(Canvas canvas){
-        ++animate;
-        if (animate >= 6){
-            switchImage = !switchImage;
-            animate = 0;
+        if (drawMe){
+            ++animate;
+            if (animate >= 6){
+                switchImage = !switchImage;
+                animate = 0;
+            }
+            if (switchImage) canvas.drawBitmap(image1, matrix, null);
+            else canvas.drawBitmap(image2, matrix, null);
         }
-        if (switchImage) canvas.drawBitmap(image1, matrix, null);
-        else canvas.drawBitmap(image2, matrix, null);
     }
 }

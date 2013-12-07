@@ -65,7 +65,7 @@ public class Player {
             ++blinkT;
             if (blinkT > 10){
                 alphaSwitch = !alphaSwitch;
-                paint.setAlpha((alphaSwitch)?0:255);
+                paint.setAlpha((alphaSwitch)?125:255);
                 blinkT = 0;
                 ++blinks;
             }

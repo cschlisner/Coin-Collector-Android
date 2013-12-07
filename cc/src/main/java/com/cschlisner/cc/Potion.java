@@ -18,22 +18,20 @@ public class Potion {
     private int posX, posY, animate;
     int timer;
     private RectF bounds = new RectF();
-    int scrW, scrH, offset;
+    int scrW, scrH;
     private Paint paint = new Paint();
-    public Potion(Context context, int sw, int sh, int sBarOffset){
+    public Potion(Context context, int sw, int sh){
         image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.pot1);
         image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.pot2);
         scrW = sw;
         scrH = sh;
-        offset = sBarOffset;
         generate();
     }
 
     private void generate(){
         Random rand = new Random();
         posX = rand.nextInt(scrW-image1.getWidth());
-        int randY = rand.nextInt(scrH-image1.getHeight());
-        posY = (randY < offset) ? offset+randY : randY;
+        posY = rand.nextInt(scrH-image1.getHeight());
         bounds.set(posX, posY, posX+image1.getWidth(), posY+image1.getHeight());
     }
 
