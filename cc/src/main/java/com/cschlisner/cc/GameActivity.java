@@ -153,7 +153,7 @@ public class GameActivity extends Activity{
         private float offsetX, offsetY, leftCntrlOffset;
         private float[] controlSize = new float[]{12.5f,16.67f,25.0f};
         private RectF mapRect, viewRect;
-        private boolean potLevel, bgADir;
+        private boolean potLevel, bgADir, killTrig = true;
         private String difficulty;
         private StatusBar statusBar;
         private ControlField controls;
@@ -211,7 +211,7 @@ public class GameActivity extends Activity{
             viewRect.set(offsetX+leftCntrlOffset, offsetY, offsetX+screenWidth, offsetY+screenHeight);
             tilesX = ((int)mapRect.width()/bgTile.getWidth())+1;
             tilesY = ((int)mapRect.height()/bgTile.getHeight())+1;
-            player = new Player(context);
+            player = new Player(context, orgSW, screenHeight);
             player.posX = offsetX+viewRect.width()/2;
             player.posY = screenHeight/2+statusBar.height;
             fireBall = new FireBall[fireCount];
@@ -317,7 +317,6 @@ public class GameActivity extends Activity{
                 potion.draw(canvas);
             paint.setColor(Color.WHITE);
             canvas.drawText(player.msg, player.posX-5, player.posY-10, paint);
-            player.msg = "";
             controls.draw(canvas);
             statusBar.draw(canvas);
         }
@@ -336,34 +335,36 @@ public class GameActivity extends Activity{
             checkWin();
             int cameraSpeed = playerSpeed - 3;
             // move player according to state of control field
-            switch (controls.direction){
-                case up:
-                    if (player.posY-5 >= statusBar.height+offsetY) player.posY -= playerSpeed;
-                    else ++cameraSpeed;
-                    player.direction = Direction.up;
-                    player.moving = true;
-                    break;
-                case right:
-                    if (player.posX+40 <= offsetX+screenWidth) player.posX += playerSpeed;
-                    else ++cameraSpeed;
-                    player.direction = Direction.right;
-                    player.moving = true;
-                    break;
-                case left:
-                    if (player.posX-6 >= offsetX+leftCntrlOffset) player.posX -= playerSpeed;
-                    else ++cameraSpeed;
-                    player.direction = Direction.left;
-                    player.moving = true;
-                    break;
-                case down:
-                    if (player.posY+51 <= offsetY+screenHeight) player.posY += playerSpeed;
-                    else ++cameraSpeed;
-                    player.direction = Direction.down;
-                    player.moving = true;
-                    break;
-                case none:
-                    player.moving = false;
-                    break;
+            if (!player.isDead){
+                switch (controls.direction){
+                    case up:
+                        if (player.posY-5 >= statusBar.height+offsetY) player.posY -= playerSpeed;
+                        else ++cameraSpeed;
+                        player.direction = Direction.up;
+                        player.moving = true;
+                        break;
+                    case right:
+                        if (player.posX+40 <= offsetX+screenWidth) player.posX += playerSpeed;
+                        else ++cameraSpeed;
+                        player.direction = Direction.right;
+                        player.moving = true;
+                        break;
+                    case left:
+                        if (player.posX-6 >= offsetX+leftCntrlOffset) player.posX -= playerSpeed;
+                        else ++cameraSpeed;
+                        player.direction = Direction.left;
+                        player.moving = true;
+                        break;
+                    case down:
+                        if (player.posY+51 <= offsetY+screenHeight) player.posY += playerSpeed;
+                        else ++cameraSpeed;
+                        player.direction = Direction.down;
+                        player.moving = true;
+                        break;
+                    case none:
+                        player.moving = false;
+                        break;
+                }
             }
             // camera movement
             int deltaX, deltaY, distX, distY;
@@ -381,15 +382,20 @@ public class GameActivity extends Activity{
 
 
             // Handle Collison Events
-            for (int i=0; i<fireCount; ++i)
-                fireBall[i].update(player.playerRect, viewRect);
+            if (!player.isDead){
+                for (int i=0; i<fireCount; ++i)
+                    fireBall[i].update(player.playerRect, viewRect);
+            }
             for (int i=0; i<coinCount; ++i)
                 coin[i].update(player.playerRect, viewRect);
             if (potLevel)
                 potion.update(player.playerRect);
             if (Globals.fireCollision){
-                Globals.fireCollision = false;
-                if (!player.invincible){
+                if (killTrig){
+                    player.isDead = true;
+                    killTrig = false;
+                }
+                if (!player.invincible && !player.isDead){
                     player.msg = "%#&@!";
                     --lives;
                     if (lives == 0) checkWin();
@@ -403,6 +409,8 @@ public class GameActivity extends Activity{
                     player.posX = viewRect.centerX();
                     player.posY = viewRect.centerY();
                     player.invincible = (player.blinks < 6);
+                    Globals.fireCollision = false;
+                    killTrig = true;
                 }
             }
             if (Globals.coinCollisions > 0){
@@ -413,6 +421,7 @@ public class GameActivity extends Activity{
                 Globals.coinCollisions = 0;
             }
             if (Globals.potionCollision){
+                player.msg="+1 speed";
                 score += 200;
                 ++playerSpeed;
                 Globals.potionCollision = false;

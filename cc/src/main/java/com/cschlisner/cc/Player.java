@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -13,38 +14,40 @@ import android.graphics.RectF;
  * Created by cole on 11/30/13.
  */
 public class Player {
-    private Bitmap sheet;
+    private Bitmap dieSheet, walkSheet;
     public GameActivity.Direction direction = GameActivity.Direction.right;
     private boolean alphaSwitch = false;
     public int blinks;
     public float posX, posY;
     private Paint paint;
     public RectF playerRect = new RectF();
-    public boolean walkSwitch = true, moving = false, invincible;
-    public String msg = " ";
-    private int walkT, frameCol = 1, blinkT, imgW, imgH;
-    public Player(Context context){
-        sheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.charsheet);
+    public boolean moving = false, invincible, isDead;
+    public String msg = "";
+    private int walkT, frameCol = 1, walkW, walkH, blinkT, dieFrame, talkT;
+    public Player(Context context, int sw, int sh){
+        walkSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.walksheet);
+        dieSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.deathsheet);
+        //walkSheet = Bitmap.createScaledBitmap(owalkSheet, 180, 120, true);
+        //scale to about 1/71 of screenW, and 1/32 of screenH
         paint = new Paint();
         paint.setColor(Color.WHITE);
-        imgW = sheet.getWidth()/3;
-        imgH = sheet.getHeight()/4;
-
+        walkW = walkSheet.getWidth()/9;
+        walkH = walkSheet.getHeight()/4;
     }
 
     private void walk(Canvas canvas, GameActivity.Direction dir){
         int frameRow, srcX, srcY;
         switch (dir){
-            case down:
+            case up:
                 frameRow = 0;
                 break;
-            case right:
+            case left:
                 frameRow = 1;
                 break;
-            case up:
+            case down:
                 frameRow = 2;
                 break;
-            case left:
+            case right:
                 frameRow = 3;
                 break;
             default:
@@ -52,24 +55,43 @@ public class Player {
                 break;
         }
         if (moving){
-            if (frameCol==1) frameCol = 0;
+            if (frameCol==0) frameCol = 1; //set it to the first walk frame
             ++walkT;
-            if (walkT >= 7){
-                frameCol = (frameCol == 0)?2:0;
+            if (walkT >= 2){
+                if (frameCol < 8) ++frameCol;
+                else frameCol = 1;
                 walkT = 0;
             }
         }
-        else frameCol = 1;
-
-        srcX = frameCol*imgW;
-        srcY = frameRow*imgH;
-        Rect src = new Rect(srcX, srcY, srcX + imgW, srcY + imgH);
-        Rect dst = new Rect((int)posX, (int)posY, (int)posX+imgW, (int)posY+imgH);
-        canvas.drawBitmap(sheet, src, dst, paint);
+        else frameCol = 0;
+        srcX = frameCol*walkW;
+        srcY = frameRow*walkH;
+        Rect src = new Rect(srcX, srcY, srcX + walkW, srcY + walkH);
+        Rect dst = new Rect((int)posX, (int)posY, (int)posX+walkW, (int)posY+walkH);
+        canvas.drawBitmap(walkSheet, src, dst, paint);
     }
-
+    
+    private void die(Canvas canvas){
+        int dieW = dieSheet.getWidth()/6;
+        int dieH = dieSheet.getHeight();
+        ++walkT;
+        if (walkT >= 4){
+            if (dieFrame < 5) ++dieFrame;
+            walkT = 0;
+        }
+        int srcX = dieFrame*dieW;
+        Rect src = new Rect(srcX, 0, srcX + dieW, dieH);
+        Rect dst = new Rect((int)posX, (int)posY, (int)posX+dieW, (int)posY+dieH);
+        canvas.drawBitmap(dieSheet, src, dst, paint);
+        if (dieFrame == 5){
+            dieFrame = 0;
+            isDead = false;
+        }
+        
+    }
+    
     public void draw(Canvas canvas){
-        playerRect.set(posX, posY, posX+imgW, posY+imgH);
+        playerRect.set(posX, posY, posX+walkW, posY+walkH);
         if (invincible){
             ++blinkT;
             if (blinkT > 10){
@@ -79,6 +101,12 @@ public class Player {
                 ++blinks;
             }
         }
-        walk(canvas, direction);
+        ++talkT;
+        if (talkT > 10){
+            if (!msg.isEmpty()) msg = "";
+            talkT = 0;
+        }
+        if (!isDead)walk(canvas, direction);
+        else die(canvas);
     }
 }
