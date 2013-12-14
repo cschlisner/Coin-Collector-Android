@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 
 import java.util.Random;
@@ -13,23 +14,15 @@ import java.util.Random;
  * Created by cole on 11/30/13.
  */
 public class Coin {
-    private Bitmap[] images = new Bitmap[8];
+    private Bitmap sheet;
     private Paint paint = new Paint();
     private int posX, posY, animate, switchImage, imgW, imgH;
     public boolean collected, drawMe;
     private RectF bounds = new RectF();
     public Coin(Context context, int sw, int sh){
-        images[0] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c1);
-        images[1] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c2);
-        images[2] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c3);
-        images[3] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c4);
-        images[4] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c5);
-        images[5] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c6);
-        images[6] = BitmapFactory.decodeResource(context.getResources(), R.drawable.c7);
-        images[7] =  BitmapFactory.decodeResource(context.getResources(), R.drawable.c8);
-
-        imgW = images[0].getWidth();
-        imgH = images[0].getHeight();
+        sheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.coinsheet);
+        imgW = sheet.getWidth()/8;
+        imgH = sheet.getHeight();
         generate(sw, sh);
     }
 
@@ -60,7 +53,9 @@ public class Coin {
                 else switchImage = 0;
                 animate = 0;
             }
-            canvas.drawBitmap(images[switchImage], posX, posY, paint);
+            Rect src = new Rect(imgW*switchImage, 0, (imgW*switchImage)+imgW, imgH);
+            Rect dst = new Rect(posX, posY, posX+imgW, posY+imgH);
+            canvas.drawBitmap(sheet, src, dst, paint);
         }
     }
 }

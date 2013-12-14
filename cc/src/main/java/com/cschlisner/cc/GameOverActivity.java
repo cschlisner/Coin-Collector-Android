@@ -29,7 +29,6 @@ public class GameOverActivity extends Activity {
     public class GameOverView extends View {
         private Paint paint = new Paint();
         private String title = "You Died!";
-        private String[] highScores;
         private TextContainer restartButton, menuButton;
         private int titleX, screenWidth, screenHeight, gameScore, oldScore;
         private boolean startedNewActivity;

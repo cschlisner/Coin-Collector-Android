@@ -63,8 +63,8 @@ public class TitleScreenActivity extends ActionBarActivity {
             Globals.hsm = medScore;
             Globals.hsh = hardScore;
             SharedPreferences settings = context.getSharedPreferences("options", Context.MODE_PRIVATE);
-            Globals.controlSize = settings.getInt("cntrlSize", 1);
-            Globals.controlsRight = settings.getBoolean("cntrlSide", true);
+            Globals.controlSize = settings.getInt("ctrlSize", 1);
+            Globals.controlsRight = settings.getBoolean("ctrlSide", true);
             titlePaint.setTypeface(Typeface.createFromAsset(getAssets(), "robotolight.ttf"));
             lx = 100;
             ly = ((screenHeight/2)+(screenHeight/6))-(logo.getHeight()*lscale)+100;
@@ -192,6 +192,7 @@ public class TitleScreenActivity extends ActionBarActivity {
                     Intent i = new Intent(context, OptionsActivity.class);
                     i.putExtra("CALLER", "TitleScreenActivity");
                     context.startActivity(i);
+                    finish();
                 }
             }
         }

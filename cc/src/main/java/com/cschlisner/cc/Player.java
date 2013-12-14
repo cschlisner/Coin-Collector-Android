@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -26,7 +25,7 @@ public class Player {
     private int walkT, frameCol = 1, walkW, walkH, blinkT, dieFrame, talkT;
     public Player(Context context, int sw, int sh){
         walkSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.walksheet);
-        dieSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.deathsheet);
+        dieSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.diesheet);
         //walkSheet = Bitmap.createScaledBitmap(owalkSheet, 180, 120, true);
         //scale to about 1/71 of screenW, and 1/32 of screenH
         paint = new Paint();
@@ -91,7 +90,7 @@ public class Player {
     }
     
     public void draw(Canvas canvas){
-        playerRect.set(posX, posY, posX+walkW, posY+walkH);
+        playerRect.set(posX+3, posY+4, posX+walkW-3, posY+walkH-4);
         if (invincible){
             ++blinkT;
             if (blinkT > 10){
@@ -101,10 +100,12 @@ public class Player {
                 ++blinks;
             }
         }
-        ++talkT;
-        if (talkT > 10){
-            if (!msg.isEmpty()) msg = "";
-            talkT = 0;
+        if (msg != ""){
+            ++talkT;
+            if (talkT > 10){
+                msg = "";
+                talkT = 0;
+            }
         }
         if (!isDead)walk(canvas, direction);
         else die(canvas);

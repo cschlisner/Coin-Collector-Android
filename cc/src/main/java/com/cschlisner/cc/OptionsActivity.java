@@ -59,6 +59,26 @@ public class OptionsActivity extends Activity {
                 controlSizeButton.draw(canvas);
                 controlSideButton.draw(canvas);
             }
+            else {
+                int newLine=0;
+                paint.setTextSize(40);
+                canvas.drawText("This game was a project by Cole Schlisner.", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=50;
+                canvas.drawText("If you have anything you would like to see,", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=50;
+                canvas.drawText("please email me at cschlisner@gmail.com.", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=100;
+                paint.setAlpha(140);
+                canvas.drawText("Thank-you to: ", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=50;
+                canvas.drawText("Clint Bellanger for Liberated Pixel Art - coins", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=50;
+                canvas.drawText("Rafaelchm on opengameart.com - potions", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                newLine+=50;
+                canvas.drawText("The LPC Universal Sprite Sheet Project", (screenWidth/2)-(screenWidth/5), (screenHeight/2)-(screenHeight/6)+newLine, paint);
+                paint.setAlpha(255);
+            }
+            paint.setTextSize(120);
             canvas.drawText(title, titleX, 120, paint);
             if (controlSizeButton.pressed || controlSideButton.pressed){
                 update();
@@ -127,24 +147,16 @@ public class OptionsActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (lastActivity.equals("TitleScreenActivity")){
-            Intent i = new Intent(this, TitleScreenActivity.class);
-            startActivity(i);
-            finish();
-        }
-        else {
-        super.onBackPressed();
-            finish();
-        }
-    }
-
-    @Override
-    protected void onPause() {
         SharedPreferences prefs = getSharedPreferences("options", Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putInt("ctrlSize", Globals.controlSize);
         edit.putBoolean("ctrlSide", Globals.controlsRight);
         edit.commit();
-        super.onPause();
+        if (lastActivity.equals("TitleScreenActivity")){
+            Intent i = new Intent(this, TitleScreenActivity.class);
+            startActivity(i);
+        }
+        super.onBackPressed();
+        finish();
     }
 }

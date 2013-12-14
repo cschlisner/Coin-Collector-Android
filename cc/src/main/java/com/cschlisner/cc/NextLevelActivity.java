@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -31,18 +32,21 @@ public class NextLevelActivity extends Activity {
 
     public class NextLevelView extends View {
         private Paint paint = new Paint();
-        private Bitmap livesBMP, coinBMP, fireBMP;
-        private boolean startedActivity;
-        private int draws;
+        private Bitmap livesBMP, coinBMP, fireBMP1, fireBMP2;
+        private boolean startedActivity, fireSwitch;
+        private int draws, animate, switchImage, imgW, imgH;
+        private Rect src, dst;
         public NextLevelView(Context context){
             super(context);
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             screenWidth = metrics.widthPixels;
             screenHeight = metrics.heightPixels;
             livesBMP = BitmapFactory.decodeResource(getResources(), R.drawable.lives);
-            coinBMP = BitmapFactory.decodeResource(getResources(), R.drawable.c5);
-            fireBMP = BitmapFactory.decodeResource(getResources(), R.drawable.fire1);
-
+            coinBMP = BitmapFactory.decodeResource(getResources(), R.drawable.coinsheet);
+            fireBMP1 = BitmapFactory.decodeResource(getResources(), R.drawable.fire1);
+            fireBMP2 = BitmapFactory.decodeResource(getResources(), R.drawable.fire2);
+            imgW = coinBMP.getWidth()/8;
+            imgH = coinBMP.getHeight();
             Intent intent = getIntent();
             mode = intent.getStringExtra("DIFFICULTY");
             Globals.mode = mode;
@@ -75,6 +79,8 @@ public class NextLevelActivity extends Activity {
             }
             paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "robotolight.ttf"));
             paint.setColor(Color.WHITE);
+            src = new Rect(imgW*switchImage, 0, (imgW*switchImage)+imgW, imgH);
+            dst = new Rect(screenWidth / 2, screenHeight / 2,  (screenWidth / 2)+imgW, (screenHeight / 2)+imgH);
         }
         @Override
         protected void onDraw(Canvas canvas) {
@@ -83,14 +89,24 @@ public class NextLevelActivity extends Activity {
             paint.setTextSize(60);
             canvas.drawBitmap(livesBMP, screenWidth / 4, screenHeight / 2, null);
             canvas.drawText(Integer.toString(lives), (screenWidth/4), screenHeight/2 + screenHeight/4, paint);
-            canvas.drawBitmap(coinBMP, screenWidth / 2, screenHeight / 2, null);
+            canvas.drawBitmap(coinBMP, src, dst, null);
             canvas.drawText(Integer.toString(coins), (screenWidth / 2), screenHeight / 2 + screenHeight / 4, paint);
-            canvas.drawBitmap(fireBMP, screenWidth / 2 + screenWidth / 4, screenHeight / 2, null);
+            if (fireSwitch) canvas.drawBitmap(fireBMP1, screenWidth / 2 + screenWidth / 4, screenHeight / 2, null);
+            else canvas.drawBitmap(fireBMP2, screenWidth / 2 + screenWidth / 4, screenHeight / 2, null);
             canvas.drawText(Integer.toString(fireCount), screenWidth/2+screenWidth/4, screenHeight/2 + screenHeight/4, paint);
 
             paint.setTextSize(100);
             canvas.drawText(String.format("%d", timer),  screenWidth/2, screenHeight/2-screenHeight/4, paint);
             ++draws;
+            ++animate;
+            if (animate == 5){
+                fireSwitch = !fireSwitch;
+                if (switchImage < 7) ++switchImage;
+                else switchImage = 0;
+                src.set(imgW*switchImage, 0, (imgW*switchImage)+imgW, imgH);
+                dst.set(screenWidth / 2, screenHeight / 2,  (screenWidth / 2)+imgW, (screenHeight / 2)+imgH);
+                animate = 0;
+            }
             if (draws >= ((timer == 0)?0:50)){
                 --timer;
                 draws = 0;
