@@ -140,7 +140,7 @@ public class GameActivity extends Activity{
     // SurfaceView
     public class GameView extends SurfaceView implements
             SurfaceHolder.Callback {
-        private int level, lives, score, coinCount, coinsCollected, fireSpeed, tilesX, tilesY,
+        private int level, lives, score, coinCount, coinsCollected, fireSpeed, tilesX, tilesY, blinkPlayer = 6,
                     fireCount, playerSpeed, screenWidth, orgSW, screenHeight, viewPaddingY, highScore;
         private float offsetX, offsetY, viewPaddingX;
         private float[] controlSize = new float[]{12.5f,16.67f,25.0f};
@@ -180,7 +180,7 @@ public class GameActivity extends Activity{
             fireSpeed = intent.getIntExtra("FIRESPEED", 0);
             fireCount = intent.getIntExtra("FIRECOUNT", 0);
             playerSpeed = intent.getIntExtra("PLAYERSPEED", 0);
-            potLevel = true;
+            potLevel = (level%2==0);
             statusBar = new StatusBar(context, level, screenWidth);
             viewPaddingY = statusBar.height;
             controls = new ControlField(context, screenWidth, screenHeight+viewPaddingY, controlSize[cntrlSize], cntrlRight);
@@ -310,7 +310,10 @@ public class GameActivity extends Activity{
         }
         public void update() {
             // make the player invincible right away
-            player.invincible = (player.blinks < 6);
+            if (blinkPlayer > 0){
+                 player.invincible = (player.blinks < blinkPlayer);
+                 if (!player.invincible) blinkPlayer = 0;
+            }
             if (controls.pauseButton.pressed) {
                 controls.pauseButton.pressed = false;
                 thread.setRunning(false);
@@ -377,7 +380,7 @@ public class GameActivity extends Activity{
             for (int i=0; i<coinCount; ++i)
                 coin[i].update(player.playerRect, viewRect);
             if (potLevel)
-                potion.update(player.playerRect);
+                potion.update(player.playerRect, viewRect);
             if (player.invincible) Globals.fireCollision = false;
             if (Globals.fireCollision){
                 if (killTrig){
@@ -392,12 +395,11 @@ public class GameActivity extends Activity{
                         fireBall[i].generate();
                         try {Thread.sleep(500/fireCount); }
                         catch (InterruptedException e) { }
-                        player.blinks = 0;
-                        player.invincible = (player.blinks < 6);
                     }
                     player.posX = viewRect.centerX();
                     player.posY = viewRect.centerY();
-                    player.invincible = (player.blinks < 6);
+                    player.blinks = 0;
+                    blinkPlayer = 6;
                     Globals.fireCollision = false;
                     killTrig = true;
                 }
@@ -410,9 +412,16 @@ public class GameActivity extends Activity{
                 Globals.coinCollisions = 0;
             }
             if (Globals.potionCollision){
-                player.msg="+1 speed";
+                if (potion.type == 1){
+                    player.msg="+1 speed";
+                    ++playerSpeed;
+                }
+                else {
+                    player.msg="20 seconds!";
+                    player.blinks = 0;
+                    blinkPlayer= 40;
+                }
                 score += 200;
-                ++playerSpeed;
                 Globals.potionCollision = false;
             }
 
