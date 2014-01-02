@@ -1,7 +1,7 @@
 CoinCollector
 =============
 
-Cole's awesome Android game. Try it out, mate.
+My attempt at an Android game. [Try it out](https://play.google.com/store/apps/details?id=com.cschlisner.cc)
 
 > ![menu](https://dl.dropboxusercontent.com/u/72972926/ScreenShots/device-2013-12-13-220017.png)
 
